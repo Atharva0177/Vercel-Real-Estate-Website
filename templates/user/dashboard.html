@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard - Premium Real Estate{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>My <span class="highlight">Dashboard</span></h1>
+        <p>Welcome back, {{ session.user_name }}!</p>
+    </div>
+</section>
+
+<section class="section" style="background: var(--light-gray);">
+    <div class="container">
+        <!-- Quick Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-heart" style="font-size: 2.5rem;"></i>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">{{ favorites|length }}</div>
+                        <div style="opacity: 0.9;">Favorites</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(240, 147, 251, 0.3);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-bell" style="font-size: 2.5rem;"></i>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">{{ alerts|length }}</div>
+                        <div style="opacity: 0.9;">Active Alerts</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(79, 172, 254, 0.3);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-calendar-check" style="font-size: 2.5rem;"></i>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">{{ bookings|length }}</div>
+                        <div style="opacity: 0.9;">Bookings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="background: white; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden;">
+            <div style="display: flex; border-bottom: 2px solid var(--light-gray);">
+                <button class="tab-btn active" onclick="showTab('favorites')" style="flex: 1; padding: 1.5rem; background: none; border: none; cursor: pointer; font-weight: 600; border-bottom: 3px solid var(--secondary-color);">
+                    <i class="fas fa-heart"></i> My Favorites
+                </button>
+                <button class="tab-btn" onclick="showTab('alerts')" style="flex: 1; padding: 1.5rem; background: none; border: none; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-bell"></i> My Alerts
+                </button>
+                <button class="tab-btn" onclick="showTab('bookings')" style="flex: 1; padding: 1.5rem; background: none; border: none; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-calendar"></i> My Bookings
+                </button>
+            </div>
+
+            <!-- Favorites Tab -->
+            <div id="favorites-tab" class="tab-content" style="padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3>Favorite Properties</h3>
+                    <a href="{{ url_for('user_favorites') }}" class="btn btn-primary">View All</a>
+                </div>
+                
+                {% if favorites %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                    {% for favorite in favorites[:6] %}
+                    <div style="border: 2px solid var(--light-gray); border-radius: 15px; overflow: hidden; transition: all 0.3s ease;">
+                        <div style="height: 200px; overflow: hidden;">
+                            {% if favorite.property.images %}
+                            <img src="{{ favorite.property.images[0].image_url }}" alt="{{ favorite.property.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400" alt="{{ favorite.property.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div style="padding: 1rem;">
+                            <h4 style="margin-bottom: 0.5rem;">{{ favorite.property.title }}</h4>
+                            <p style="color: var(--dark-gray); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-map-marker-alt"></i> {{ favorite.property.location }}
+                            </p>
+                            <p style="font-size: 1.2rem; font-weight: 700; color: var(--secondary-color);">
+                                ₹{{ "{:,.0f}".format(favorite.property.price) }}
+                            </p>
+                            <a href="{{ url_for('property_detail', id=favorite.property.id) }}" class="btn btn-primary btn-block" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 3rem; color: var(--dark-gray);">
+                    <i class="fas fa-heart" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                    <p>No favorite properties yet. Start exploring!</p>
+                    <a href="{{ url_for('properties') }}" class="btn btn-primary" style="margin-top: 1rem;">Browse Properties</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Alerts Tab -->
+            <div id="alerts-tab" class="tab-content" style="display: none; padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3>Property Alerts</h3>
+                    <a href="{{ url_for('create_alert') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Alert
+                    </a>
+                </div>
+                
+                {% if alerts %}
+                <div style="display: grid; gap: 1rem;">
+                    {% for alert in alerts %}
+                    <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="margin-bottom: 0.5rem;">
+                                <i class="fas fa-bell"></i> 
+                                {% if alert.property_type %}{{ alert.property_type }}{% else %}All Property Types{% endif %}
+                            </h4>
+                            <p style="color: var(--dark-gray); margin: 0;">
+                                {% if alert.location %}Location: {{ alert.location }} | {% endif %}
+                                {% if alert.min_price %}Min: ₹{{ "{:,.0f}".format(alert.min_price) }}{% endif %}
+                                {% if alert.max_price %} - Max: ₹{{ "{:,.0f}".format(alert.max_price) }}{% endif %}
+                            </p>
+                        </div>
+                        <form method="post" action="{{ url_for('delete_alert', alert_id=alert.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this alert?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 3rem; color: var(--dark-gray);">
+                    <i class="fas fa-bell-slash" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                    <p>No active alerts. Create one to get notified about new properties!</p>
+                    <a href="{{ url_for('create_alert') }}" class="btn btn-primary" style="margin-top: 1rem;">Create Alert</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="bookings-tab" class="tab-content" style="display: none; padding: 2rem;">
+                <h3 style="margin-bottom: 2rem;">My Bookings</h3>
+                
+                {% if bookings %}
+                <div style="display: grid; gap: 1rem;">
+                    {% for booking in bookings %}
+                    <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 0.5rem;">{{ booking.property.title }}</h4>
+                                <p style="color: var(--dark-gray); margin: 0.3rem 0;">
+                                    <i class="fas fa-calendar"></i> {{ booking.booking_date.strftime('%d %B %Y') }}
+                                </p>
+                                <p style="color: var(--dark-gray); margin: 0.3rem 0;">
+                                    <i class="fas fa-clock"></i> {{ booking.booking_time }}
+                                </p>
+                                <p style="color: var(--dark-gray); margin: 0.3rem 0;">
+                                    <i class="fas fa-users"></i> {{ booking.number_of_visitors }} visitor(s)
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+                                    {% if booking.status == 'Confirmed' %}background: #d4edda; color: #155724;
+                                    {% elif booking.status == 'Pending' %}background: #fff3cd; color: #856404;
+                                    {% elif booking.status == 'Cancelled' %}background: #f8d7da; color: #721c24;
+                                    {% else %}background: #d1ecf1; color: #0c5460;{% endif %}">
+                                    {{ booking.status }}
+                                </span>
+                                {% if booking.status == 'Pending' %}
+                                <form method="post" action="{{ url_for('cancel_booking', booking_id=booking.id) }}" style="margin-top: 1rem;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this booking?')">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 3rem; color: var(--dark-gray);">
+                    <i class="fas fa-calendar-times" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                    <p>No bookings yet. Schedule a site visit for properties you're interested in!</p>
+                    <a href="{{ url_for('properties') }}" class="btn btn-primary" style="margin-top: 1rem;">Browse Properties</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.style.borderBottom = 'none';
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    
+    // Add active class to clicked button
+    event.target.style.borderBottom = '3px solid var(--secondary-color)';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Properties - Premium Real Estate{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb fade-in-up">
+            <a href="{{ url_for('index') }}">Home</a>
+            <span>/</span>
+            <span>Properties</span>
+        </div>
+        <h1 class="fade-in-up">Explore Our <span class="highlight">Properties</span></h1>
+        <p class="fade-in-up delay-1">Find your perfect plot from our exclusive collection</p>
+    </div>
+</section>
+
+<!-- Properties Listing -->
+<section class="section">
+    <div class="container">
+        <!-- Filters -->
+        <div class="search-filters fade-in-up">
+            <form method="get" action="{{ url_for('properties') }}" class="property-filters">
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by title or location..." value="{{ request.args.get('search', '') }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Property Type</label>
+                    <select name="type" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="Residential Plot" {% if request.args.get('type') == 'Residential Plot' %}selected{% endif %}>Residential Plot</option>
+                        <option value="Commercial Plot" {% if request.args.get('type') == 'Commercial Plot' %}selected{% endif %}>Commercial Plot</option>
+                        <option value="Agricultural Land" {% if request.args.get('type') == 'Agricultural Land' %}selected{% endif %}>Agricultural Land</option>
+                        <option value="Industrial Plot" {% if request.args.get('type') == 'Industrial Plot' %}selected{% endif %}>Industrial Plot</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                    <select name="location" class="form-control">
+                        <option value="">All Locations</option>
+                        <option value="Mumbai" {% if request.args.get('location') == 'Mumbai' %}selected{% endif %}>Mumbai</option>
+                        <option value="Pune" {% if request.args.get('location') == 'Pune' %}selected{% endif %}>Pune</option>
+                        <option value="Nashik" {% if request.args.get('location') == 'Nashik' %}selected{% endif %}>Nashik</option>
+                        <option value="Thane" {% if request.args.get('location') == 'Thane' %}selected{% endif %}>Thane</option>
+                        <option value="Lonavala" {% if request.args.get('location') == 'Lonavala' %}selected{% endif %}>Lonavala</option>
+                        <option value="Alibaug" {% if request.args.get('location') == 'Alibaug' %}selected{% endif %}>Alibaug</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i> Status</label>
+                    <select name="status" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="Available" {% if request.args.get('status') == 'Available' %}selected{% endif %}>Available</option>
+                        <option value="Reserved" {% if request.args.get('status') == 'Reserved' %}selected{% endif %}>Reserved</option>
+                        <option value="Sold" {% if request.args.get('status') == 'Sold' %}selected{% endif %}>Sold</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-sort"></i> Sort By</label>
+                    <select name="sort" class="form-control">
+                        <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="area_low" {% if request.args.get('sort') == 'area_low' %}selected{% endif %}>Area: Low to High</option>
+                        <option value="area_high" {% if request.args.get('sort') == 'area_high' %}selected{% endif %}>Area: High to Low</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a href="{{ url_for('properties') }}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Results Info -->
+        <div class="results-info fade-in-up">
+            <p>Showing <strong>{{ properties.items|length }}</strong> of <strong>{{ properties.total }}</strong> properties</p>
+        </div>
+        
+        <!-- Properties Grid -->
+        {% if properties.items %}
+        <div class="properties-grid">
+            {% for property in properties.items %}
+            <div class="property-card fade-in-up">
+                <a href="{{ url_for('property_detail', id=property.id) }}" class="property-card-link">
+                    <div class="property-image">
+                        {% if property.images %}
+                            <img src="{{ property.images[0].image_url }}" alt="{{ property.title }}" loading="lazy">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800" alt="{{ property.title }}" loading="lazy">
+                        {% endif %}
+                        
+                        {% if property.status == 'Available' %}
+                            <div class="property-badge">Available</div>
+                        {% elif property.status == 'Reserved' %}
+                            <div class="property-badge reserved">Reserved</div>
+                        {% elif property.status == 'Sold' %}
+                            <div class="property-badge sold">Sold</div>
+                        {% endif %}
+                        
+                        {% if property.featured %}
+                            <div class="property-badge featured" style="top: 1rem; left: 1rem; right: auto;">
+                                <i class="fas fa-star"></i> Featured
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="property-content">
+                        <div class="property-type">
+                            <i class="fas fa-tag"></i> {{ property.property_type }}
+                        </div>
+                        <h3>{{ property.title }}</h3>
+                        <p>{{ property.description[:100] }}...</p>
+                        <div class="property-details">
+                            <span><i class="fas fa-map-marker-alt"></i> {{ property.location }}</span>
+                            <span><i class="fas fa-ruler-combined"></i> {{ property.area|int }} sq ft</span>
+                        </div>
+                        <div class="property-footer">
+                            <div class="property-price">
+                                <span class="price">₹{{ "{:,.0f}".format(property.price) }}</span>
+                            </div>
+                            <span class="btn-link-text">
+                                View Details <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if properties.pages > 1 %}
+        <div class="pagination">
+            {% if properties.has_prev %}
+            <a href="{{ url_for('properties', page=properties.prev_num, search=request.args.get('search', ''), type=request.args.get('type', ''), location=request.args.get('location', ''), status=request.args.get('status', ''), sort=request.args.get('sort', 'newest')) }}" class="page-link">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% endif %}
+            
+            {% for page_num in properties.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == properties.page %}
+                    <span class="page-link active">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('properties', page=page_num, search=request.args.get('search', ''), type=request.args.get('type', ''), location=request.args.get('location', ''), status=request.args.get('status', ''), sort=request.args.get('sort', 'newest')) }}" class="page-link">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                    <span class="page-link">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if properties.has_next %}
+            <a href="{{ url_for('properties', page=properties.next_num, search=request.args.get('search', ''), type=request.args.get('type', ''), location=request.args.get('location', ''), status=request.args.get('status', ''), sort=request.args.get('sort', 'newest')) }}" class="page-link">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h3>No Properties Found</h3>
+            <p>Try adjusting your search filters</p>
+            <a href="{{ url_for('properties') }}" class="btn btn-primary">Reset Filters</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Enquiries - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-user-shield"></i>
+            <span>Admin Panel</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin_properties') }}" class="nav-item">
+                <i class="fas fa-building"></i> Properties
+            </a>
+            <a href="{{ url_for('admin_add_property') }}" class="nav-item">
+                <i class="fas fa-plus-circle"></i> Add Property
+            </a>
+            <a href="{{ url_for('admin_enquiries') }}" class="nav-item active">
+                <i class="fas fa-envelope"></i> Enquiries
+            </a>
+            <a href="{{ url_for('index') }}" class="nav-item">
+                <i class="fas fa-globe"></i> View Website
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1><i class="fas fa-envelope"></i> Enquiries</h1>
+            <div class="filter-buttons">
+                <a href="{{ url_for('admin_enquiries') }}" class="btn {% if not request.args.get('status') %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+                <a href="{{ url_for('admin_enquiries', status='New') }}" class="btn {% if request.args.get('status') == 'New' %}btn-primary{% else %}btn-secondary{% endif %}">New</a>
+                <a href="{{ url_for('admin_enquiries', status='Contacted') }}" class="btn {% if request.args.get('status') == 'Contacted' %}btn-primary{% else %}btn-secondary{% endif %}">Contacted</a>
+                <a href="{{ url_for('admin_enquiries', status='Closed') }}" class="btn {% if request.args.get('status') == 'Closed' %}btn-primary{% else %}btn-secondary{% endif %}">Closed</a>
+            </div>
+        </div>
+        
+        <div class="admin-content">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Property</th>
+                            <th>Message</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enquiry in enquiries.items %}
+                        <tr>
+                            <td>#{{ enquiry.id }}</td>
+                            <td>{{ enquiry.name }}</td>
+                            <td>{{ enquiry.email }}</td>
+                            <td>{{ enquiry.phone }}</td>
+                            <td>
+                                {% if enquiry.property %}
+                                <a href="{{ url_for('property_detail', id=enquiry.property.id) }}" target="_blank">
+                                    {{ enquiry.property.title[:40] }}...
+                                </a>
+                                {% else %}
+                                General Enquiry
+                                {% endif %}
+                            </td>
+                            <td>{{ enquiry.message[:50] }}...</td>
+                            <td>
+                                <span class="status-badge status-{{ enquiry.status.lower() }}">
+                                    {{ enquiry.status }}
+                                </span>
+                            </td>
+                            <td>{{ enquiry.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('update_enquiry_status', id=enquiry.id) }}" style="display: inline;">
+                                    <select name="status" onchange="this.form.submit()" class="status-select">
+                                        <option value="New" {% if enquiry.status == 'New' %}selected{% endif %}>New</option>
+                                        <option value="Contacted" {% if enquiry.status == 'Contacted' %}selected{% endif %}>Contacted</option>
+                                        <option value="Closed" {% if enquiry.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if enquiries.pages > 1 %}
+            <div class="pagination">
+                {% if enquiries.has_prev %}
+                <a href="{{ url_for('admin_enquiries', page=enquiries.prev_num, status=request.args.get('status', '')) }}" class="page-link">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+                {% endif %}
+                
+                {% for page_num in enquiries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == enquiries.page %}
+                        <span class="page-link active">{{ page_num }}</span>
+                        {% else %}
+                        <a href="{{ url_for('admin_enquiries', page=page_num, status=request.args.get('status', '')) }}" class="page-link">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                        <span class="page-link">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if enquiries.has_next %}
+                <a href="{{ url_for('admin_enquiries', page=enquiries.next_num, status=request.args.get('status', '')) }}" class="page-link">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

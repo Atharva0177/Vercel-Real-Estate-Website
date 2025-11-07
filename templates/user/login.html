@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Premium Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    margin-top: 70px;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600') center/cover;
+    opacity: 0.1;
+    animation: kenburns 20s infinite alternate;
+}
+
+@keyframes kenburns {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+.auth-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+    width: 100%;
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 0.8s ease;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-left {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-left::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.auth-left-content {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-icon {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 3rem;
+    backdrop-filter: blur(10px);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.auth-left h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.auth-left p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.auth-right {
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.auth-header p {
+    color: var(--dark-gray);
+    font-size: 0.95rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid var(--medium-gray);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--light-gray);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: white;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+}
+
+.btn-auth {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-auth:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--dark-gray);
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.divider span {
+    padding: 0 1rem;
+    font-size: 0.85rem;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--dark-gray);
+}
+
+.auth-footer a {
+    color: var(--accent-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.auth-footer a:hover {
+    color: var(--secondary-color);
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+}
+
+.features-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.features-list i {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .auth-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .auth-left {
+        padding: 2rem;
+    }
+    
+    .auth-left h2 {
+        font-size: 1.8rem;
+    }
+    
+    .auth-right {
+        padding: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <div class="auth-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h2>Welcome Back!</h2>
+                <p>Login to access your account and manage your favorite properties</p>
+                
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Save Favorite Properties</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Create Property Alerts</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Book Site Visits</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Track Your Enquiries</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="auth-right">
+            <div class="auth-header">
+                <h1>Login to Your Account</h1>
+                <p>Enter your credentials to continue</p>
+            </div>
+            
+            <form method="post" action="{{ url_for('user_login') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        {{ form.email(class="form-control", placeholder="john@example.com", autocomplete="email") }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        {{ form.password(class="form-control", placeholder="Enter your password", autocomplete="current-password") }}
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-auth">
+                    <i class="fas fa-sign-in-alt"></i> Login Now
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>Don't have an account?</span>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Create a new account to get started</p>
+                <a href="{{ url_for('user_register') }}">
+                    <i class="fas fa-user-plus"></i> Register Here
+                </a>
+            </div>
+            
+            <div class="auth-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--light-gray);">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

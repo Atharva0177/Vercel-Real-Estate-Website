@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Property - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-user-shield"></i>
+            <span>Admin Panel</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin_properties') }}" class="nav-item">
+                <i class="fas fa-building"></i> Properties
+            </a>
+            <a href="{{ url_for('admin_add_property') }}" class="nav-item active">
+                <i class="fas fa-plus-circle"></i> Add Property
+            </a>
+            <a href="{{ url_for('admin_enquiries') }}" class="nav-item">
+                <i class="fas fa-envelope"></i> Enquiries
+            </a>
+            <a href="{{ url_for('index') }}" class="nav-item">
+                <i class="fas fa-globe"></i> View Website
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1><i class="fas fa-plus-circle"></i> Add New Property</h1>
+        </div>
+        
+        <div class="admin-content">
+            <div class="form-container">
+                <form method="post" enctype="multipart/form-data" class="property-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-section">
+                        <h3>Basic Information</h3>
+                        
+                        <div class="form-group">
+                            <label>{{ form.title.label }}</label>
+                            {{ form.title(class="form-control") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>{{ form.description.label }}</label>
+                            {{ form.description(class="form-control", rows="5") }}
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>{{ form.property_type.label }}</label>
+                                {{ form.property_type(class="form-control") }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{{ form.status.label }}</label>
+                                {{ form.status(class="form-control") }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                {{ form.featured() }} Featured Property
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Pricing & Area</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>{{ form.price.label }}</label>
+                                {{ form.price(class="form-control") }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{{ form.area.label }}</label>
+                                {{ form.area(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Location Details</h3>
+                        
+                        <div class="form-group">
+                            <label>{{ form.location.label }}</label>
+                            {{ form.location(class="form-control") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>{{ form.address.label }}</label>
+                            {{ form.address(class="form-control", rows="3") }}
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>{{ form.latitude.label }}</label>
+                                {{ form.latitude(class="form-control", placeholder="e.g., 19.0760") }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{{ form.longitude.label }}</label>
+                                {{ form.longitude(class="form-control", placeholder="e.g., 72.8777") }}
+                            </div>
+                        </div>
+                        
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i> 
+                            You can get latitude and longitude from <a href="https://www.google.com/maps" target="_blank">Google Maps</a>
+                        </p>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Images & Videos</h3>
+                        
+                        <div class="form-group">
+                            <label>{{ form.images.label }}</label>
+                            {{ form.images(class="form-control") }}
+                            <p class="help-text">You can select multiple images (JPG, PNG, GIF)</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>{{ form.video_urls.label }}</label>
+                            {{ form.video_urls(class="form-control", rows="4", placeholder="https://www.youtube.com/watch?v=...\nhttps://vimeo.com/...") }}
+                            <p class="help-text">Enter one video URL per line</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Add Property
+                        </button>
+                        <a href="{{ url_for('admin_properties') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

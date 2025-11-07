@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-user-shield"></i>
+            <span>Admin Panel</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin_properties') }}" class="nav-item">
+                <i class="fas fa-building"></i> Properties
+            </a>
+            <a href="{{ url_for('admin_add_property') }}" class="nav-item">
+                <i class="fas fa-plus-circle"></i> Add Property
+            </a>
+            <a href="{{ url_for('admin_enquiries') }}" class="nav-item">
+                <i class="fas fa-envelope"></i> Enquiries
+            </a>
+            <a href="{{ url_for('admin_bookings') }}" class="nav-item">
+                <i class="fas fa-calendar-check"></i> Bookings
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="nav-item">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="{{ url_for('admin_analytics') }}" class="nav-item active">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
+            <a href="{{ url_for('index') }}" class="nav-item">
+                <i class="fas fa-globe"></i> View Website
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="nav-item">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1><i class="fas fa-chart-bar"></i> Analytics & Reports</h1>
+        </div>
+        
+        <div class="admin-content">
+            <!-- Overview Stats -->
+            <div class="stats-grid" style="margin-bottom: 3rem;">
+                <div class="stat-card blue">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>{{ total_properties }}</h3>
+                        <p>Total Properties</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card green">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>{{ total_users }}</h3>
+                        <p>Registered Users</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card orange">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>{{ total_bookings }}</h3>
+                        <p>Total Bookings</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card purple">
+                    <div class="stat-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>{{ total_enquiries }}</h3>
+                        <p>Total Enquiries</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Type Distribution -->
+            <div class="dashboard-section" style="margin-bottom: 2rem;">
+                <h2><i class="fas fa-chart-pie"></i> Property Type Distribution</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                    {% for prop_type, count in property_types %}
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 15px; text-align: center;">
+                        <h3 style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ count }}</h3>
+                        <p style="opacity: 0.9;">{{ prop_type }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Monthly Properties -->
+            <div class="dashboard-section" style="margin-bottom: 2rem;">
+                <h2><i class="fas fa-chart-line"></i> Property Additions (Last 6 Months)</h2>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; align-items: flex-end; height: 300px;">
+                    {% for month, count in monthly_properties %}
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: linear-gradient(to top, #667eea, #764ba2); width: 100%; border-radius: 10px 10px 0 0; display: flex; align-items: flex-end; justify-content: center; padding: 1rem; color: white; font-weight: 700; font-size: 1.2rem;" 
+                             data-height="{{ (count / monthly_properties|map(attribute=1)|max * 100) if monthly_properties|map(attribute=1)|max > 0 else 0 }}%">
+                            {{ count }}
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--dark-gray);">{{ month }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Top Viewed Properties -->
+            <div class="dashboard-section">
+                <h2><i class="fas fa-eye"></i> Most Viewed Properties</h2>
+                <div class="table-responsive" style="margin-top: 1.5rem;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Views</th>
+                                <th>Shares</th>
+                                <th>Favorites</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for property in top_properties %}
+                            <tr>
+                                <td>#{{ loop.index }}</td>
+                                <td>
+                                    <a href="{{ url_for('property_detail', id=property.id) }}" target="_blank" style="color: var(--accent-color);">
+                                        {{ property.title }}
+                                    </a>
+                                </td>
+                                <td>{{ property.property_type }}</td>
+                                <td>{{ property.location }}</td>
+                                <td><span style="color: var(--accent-color); font-weight: 600;">{{ property.views }}</span></td>
+                                <td><span style="color: var(--success); font-weight: 600;">{{ property.shares }}</span></td>
+                                <td><span style="color: var(--danger); font-weight: 600;">{{ property.favorites|length }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Animate bar heights
+document.addEventListener('DOMContentLoaded', function() {
+    const bars = document.querySelectorAll('[data-height]');
+    bars.forEach(bar => {
+        const height = bar.getAttribute('data-height');
+        bar.style.height = '0';
+        setTimeout(() => {
+            bar.style.transition = 'height 1s ease';
+            bar.style.height = height;
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

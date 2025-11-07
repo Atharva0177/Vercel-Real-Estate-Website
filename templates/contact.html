@@ -1,0 +1,626 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - Premium Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Contact Page Specific Styles */
+.contact-hero {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)),
+                url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1600') center/cover;
+    color: var(--white);
+    text-align: center;
+    padding: 8rem 0 4rem;
+    margin-top: 70px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, transparent 20%, rgba(0,0,0,0.2));
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.contact-hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.contact-hero h1 {
+    font-size: 3.5rem;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease;
+}
+
+.contact-hero p {
+    font-size: 1.3rem;
+    opacity: 0.95;
+    animation: fadeInUp 0.8s ease 0.2s backwards;
+}
+
+.contact-main {
+    padding: 5rem 0;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Contact Info Card */
+.contact-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInLeft 0.8s ease;
+}
+
+.contact-info-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.contact-info-card h2 {
+    font-size: 2.5rem;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.contact-info-card > p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.info-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.info-box:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(10px);
+}
+
+.info-box-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.info-box-content h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.info-box-content p {
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.info-box-content a {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.info-box-content a:hover {
+    opacity: 0.8;
+    margin-left: 5px;
+}
+
+.social-connect {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.social-connect h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-icons {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-5px);
+}
+
+/* Contact Form Card */
+.contact-form-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    animation: fadeInRight 0.8s ease;
+}
+
+.contact-form-card h2 {
+    font-size: 2.5rem;
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.contact-form-card > p {
+    color: var(--dark-gray);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.contact-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.contact-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.contact-form label i {
+    margin-right: 0.5rem;
+    color: var(--accent-color);
+}
+
+.contact-form .form-control {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--medium-gray);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--light-gray);
+}
+
+.contact-form .form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: white;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+}
+
+.contact-form textarea.form-control {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.contact-form .btn-submit {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.contact-form .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
+}
+
+.contact-form .btn-submit i {
+    transition: transform 0.3s ease;
+}
+
+.contact-form .btn-submit:hover i {
+    transform: translateX(5px);
+}
+
+/* Map Section */
+.map-section {
+    padding: 0;
+    margin-top: 5rem;
+}
+
+.map-container {
+    height: 500px;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.8s ease;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Quick Stats */
+.quick-stats-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 0;
+    margin-top: 5rem;
+}
+
+.quick-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    color: white;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-10px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Animations */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .contact-wrapper {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .contact-form .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .contact-hero {
+        padding: 6rem 0 3rem;
+    }
+    
+    .contact-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .contact-hero p {
+        font-size: 1.1rem;
+    }
+    
+    .contact-info-card,
+    .contact-form-card {
+        padding: 2rem;
+    }
+    
+    .map-container {
+        height: 350px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Contact Hero -->
+<section class="contact-hero">
+    <div class="contact-hero-content">
+        <div class="container">
+            <h1>Get In <span class="highlight">Touch</span></h1>
+            <p>We're here to help you find your dream property</p>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Main Section -->
+<section class="contact-main">
+    <div class="container">
+        <div class="contact-wrapper">
+            <!-- Contact Info Card -->
+            <div class="contact-info-card">
+                <h2>Let's Connect</h2>
+                <p>Have questions? We're here to help! Reach out to us through any of the following channels.</p>
+                
+                <div class="info-items">
+                    <div class="info-box">
+                        <div class="info-box-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <h4>Visit Us</h4>
+                            <p>123 Real Estate Avenue<br>Mumbai, Maharashtra 400001<br>India</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <h4>Call Us</h4>
+                            <p>
+                                <a href="tel:+919876543210">+91 98765 43210</a><br>
+                                <a href="tel:+918765432109">+91 87654 32109</a>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <h4>Email Us</h4>
+                            <p>
+                                <a href="mailto:info@premiumestate.com">info@premiumestate.com</a><br>
+                                <a href="mailto:sales@premiumestate.com">sales@premiumestate.com</a>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <h4>Working Hours</h4>
+                            <p>
+                                Monday - Saturday<br>
+                                9:00 AM - 6:00 PM<br>
+                                Sunday: Closed
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- <div class="social-connect">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div> -->
+            </div>
+            
+            <!-- Contact Form Card -->
+            <div class="contact-form-card">
+                <h2>Send Us A Message</h2>
+                <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+                
+                <form method="post" action="{{ url_for('submit_enquiry') }}" class="contact-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            {{ form.name(class="form-control", placeholder="John Doe") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email Address</label>
+                            {{ form.email(class="form-control", placeholder="john@example.com") }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Phone Number</label>
+                        {{ form.phone(class="form-control", placeholder="+91 98765 43210") }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Your Message</label>
+                        {{ form.message(class="form-control", rows="6", placeholder="Tell us about your requirements...") }}
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<!-- <section class="quick-stats-section">
+    <div class="container">
+        <div class="quick-stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Customer Support</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="stat-value">&lt;2hrs</div>
+                <div class="stat-label">Response Time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Verified Properties</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="stat-value">1200+</div>
+                <div class="stat-label">Happy Clients</div>
+            </div>
+        </div>
+    </div>
+</section> -->
+
+<!-- Map Section -->
+<section class="map-section">
+    <div class="container">
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d241317.14571765626!2d72.71637021640625!3d19.082177500000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin" 
+                allowfullscreen="" 
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section" style="margin-top: 5rem;">
+    <div class="container">
+        <div class="cta-content fade-in-up">
+            <h2>Ready to Find Your Dream Property?</h2>
+            <p>Browse our exclusive collection of premium properties</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('properties') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search"></i> Browse Properties
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
