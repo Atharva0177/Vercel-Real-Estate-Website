@@ -616,15 +616,15 @@ pytest tests/
 
 ### Manual Testing Checklist
 
-- [ ] User registration and login
-- [ ] Admin login
-- [ ] Property creation with images
-- [ ] Property search and filters
-- [ ] Favorite property functionality
-- [ ] Booking system
-- [ ] Enquiry submission
-- [ ] File uploads
-- [ ] Responsive design on mobile
+- [x] User registration and login
+- [x] Admin login
+- [x] Property creation with images
+- [x] Property search and filters
+- [x] Favorite property functionality
+- [x] Booking system
+- [x] Enquiry submission
+- [x] File uploads
+- [x] Responsive design on mobile
 
 ---
 
