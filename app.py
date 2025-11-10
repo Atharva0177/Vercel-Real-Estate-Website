@@ -445,30 +445,34 @@ def admin_dashboard():
         pending_bookings = Booking.query.filter_by(status='Pending').count()
         total_views = db.session.query(db.func.sum(Property.views)).scalar() or 0
         total_shares = db.session.query(db.func.sum(Property.shares)).scalar() or 0
-        
+
         # Recent data
         recent_properties = Property.query.order_by(Property.created_at.desc()).limit(5).all()
         recent_enquiries = Enquiry.query.order_by(Enquiry.created_at.desc()).limit(5).all()
         recent_bookings = Booking.query.order_by(Booking.created_at.desc()).limit(5).all()
         recent_activities = ActivityLog.query.order_by(ActivityLog.created_at.desc()).limit(10).all()
-        
+
         stats = {
             'total': total_properties,
             'available': available_properties,
             'sold': sold_properties,
             'enquiries': new_enquiries,
             'users': total_users,
+            # NOTE: this key is referenced by the dashboard as Pending Visits
             'bookings': pending_bookings,
             'views': total_views,
             'shares': total_shares
         }
-        
-        return render_template('admin/dashboard.html', 
-                             stats=stats, 
-                             properties=recent_properties, 
-                             enquiries=recent_enquiries,
-                             bookings=recent_bookings,
-                             activities=recent_activities)
+
+        return render_template(
+            'admin/dashboard.html',
+            stats=stats,
+            # names used by the dashboard template
+            properties=recent_properties,
+            enquiries=recent_enquiries,
+            bookings=recent_bookings,
+            activities=recent_activities
+        )
     except Exception as e:
         print(f"Error in admin_dashboard route: {e}")
         return f"Error: {e}", 500
@@ -732,11 +736,9 @@ def admin_delete_document(id):
 def admin_enquiries():
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', '')
-    
     query = Enquiry.query
     if status:
         query = query.filter_by(status=status)
-    
     enquiries = query.order_by(Enquiry.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template('admin/enquiries.html', enquiries=enquiries)
 
@@ -748,22 +750,29 @@ def update_enquiry_status(id):
     if status in ['New', 'Contacted', 'Closed']:
         enquiry.status = status
         db.session.commit()
-        
         log_activity('update_enquiry_status', f'Updated enquiry #{id} to {status}', 'admin')
-        
         flash('Enquiry status updated!', 'success')
-    return redirect(url_for('admin_enquiries'))
+    return redirect(url_for('admin_enquiries', **request.args))
+
+# NEW: Delete enquiry
+@app.route('/admin/enquiry/delete/<int:id>', methods=['POST'])
+@admin_login_required
+def delete_enquiry(id):
+    enquiry = Enquiry.query.get_or_404(id)
+    db.session.delete(enquiry)
+    db.session.commit()
+    log_activity('delete_enquiry', f'Deleted enquiry #{id}', 'admin')
+    flash('Enquiry deleted.', 'success')
+    return redirect(url_for('admin_enquiries', **request.args))
 
 @app.route('/admin/bookings')
 @admin_login_required
 def admin_bookings():
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', '')
-    
     query = Booking.query
     if status:
         query = query.filter_by(status=status)
-    
     bookings = query.order_by(Booking.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template('admin/bookings.html', bookings=bookings)
 
@@ -775,11 +784,20 @@ def update_booking_status(id):
     if status in ['Pending', 'Confirmed', 'Cancelled', 'Completed']:
         booking.status = status
         db.session.commit()
-        
         log_activity('update_booking_status', f'Updated booking #{id} to {status}', 'admin')
-        
         flash('Booking status updated!', 'success')
-    return redirect(url_for('admin_bookings'))
+    return redirect(url_for('admin_bookings', **request.args))
+
+# NEW: Delete booking
+@app.route('/admin/booking/delete/<int:id>', methods=['POST'])
+@admin_login_required
+def delete_booking(id):
+    booking = Booking.query.get_or_404(id)
+    db.session.delete(booking)
+    db.session.commit()
+    log_activity('delete_booking', f'Deleted booking #{id}', 'admin')
+    flash('Booking deleted.', 'success')
+    return redirect(url_for('admin_bookings', **request.args))
 
 @app.route('/admin/users')
 @admin_login_required
