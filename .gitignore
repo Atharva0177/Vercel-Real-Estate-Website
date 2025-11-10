@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+instance/
+env/
+venv/
+.venv/
+*.sqlite3
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Flask/Migrations
+migrations/
+*.log
+
+# VSCode / IDE files
+.vscode/
+.idea/
+
+# Uploads and cache
+static/uploads/
+*.DS_Store
