@@ -9,9 +9,9 @@
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-3.0.5-red.svg)](https://www.sqlalchemy.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A full-featured real estate property management platform built with Flask, featuring property listings, user authentication, booking system, and comprehensive admin dashboard.
+A full-featured real estate property management platform built with Flask, featuring property listings, user authentication, booking system, file uploads, alerting, email notifications, analytics, and a comprehensive admin dashboard.
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Screenshots](#-screenshots) • [API](#-api-routes) • [Contributing](#-contributing)
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Screenshots](#-screenshots) • [API](#-api-routes) • [Architecture](#-architecture--internals) • [Analytics](#-admin-analytics--reporting) • [Changelog](#-changelog--whats-new) • [Contributing](#-contributing)
 
 </div>
 
@@ -20,8 +20,10 @@ A full-featured real estate property management platform built with Flask, featu
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
+- [Key Highlights](#-key-highlights)
 - [Features](#-features)
 - [Technology Stack](#-technology-stack)
+- [Architecture & Internals](#-architecture--internals)
 - [Project Structure](#-project-structure)
 - [Installation](#-installation)
 - [Configuration](#-configuration)
@@ -30,95 +32,151 @@ A full-featured real estate property management platform built with Flask, featu
 - [Database Models](#-database-models)
 - [API Routes](#-api-routes)
 - [Admin Panel](#-admin-panel)
+- [Admin Analytics & Reporting](#-admin-analytics--reporting)
 - [User Features](#-user-features)
-- [Contributing](#-contributing)
+- [Security & Validation](#-security--validation)
+- [Email Notification System](#-email-notification-system)
+- [Activity Logging](#-activity-logging)
+- [Customization](#-customization)
+- [Testing](#-testing)
+- [Deployment & Scaling](#-deployment--scaling)
+- [Changelog / What's New](#-changelog--whats-new)
+- [Future Enhancements](#-future-enhancements)
 - [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+- [Project Stats](#-project-stats)
 
 ---
 
 ## 🌟 Overview
 
-This **Real Estate Website** is a comprehensive property management platform designed for real estate agencies, property dealers, and individual sellers. The platform enables property listing, browsing, user management, booking system, and advanced analytics through an intuitive admin dashboard.
+This **Real Estate Website** is a comprehensive property management platform designed for real estate agencies, property dealers, and individual sellers. It enables property listing, browsing, booking site visits, user favorites, property alerts, enquiry management, document handling, video embedding, analytics visualization, and administrative control.
 
 ### 🎯 Key Highlights
 
-- **Dual Interface**: Separate portals for administrators and end-users
-- **Property Management**: Complete CRUD operations for properties with images, videos, and documents
-- **User Authentication**: Secure registration and login system with password hashing
-- **Booking System**: Schedule property site visits with time slot management
-- **Favorites & Alerts**: Users can save favorite properties and set up property alerts
-- **Advanced Search**: Filter properties by type, price, location, and area
-- **Analytics Dashboard**: Real-time statistics and insights for administrators
-- **Responsive Design**: Mobile-first design that works on all devices
-- **File Upload**: Support for images, videos, and documents (PDFs, DOCs)
+- **Dual Interface**: Separate portals for administrators and end-users.
+- **Full Lifecycle Property Management**: Images, videos, documents, status changes, featured flags, views & shares tracking.
+- **User Engagement Tools**: Favorites, alerts with automatic email triggering, booking system.
+- **Real-Time Admin Insights**: Property type distribution, monthly additions, top viewed properties, aggregated counters.
+- **Robust Upload Handling**: Timestamped secure filenames, multi-file support.
+- **Email Notifications**: Enquiries, bookings, status changes, alert matches, admin test.
+- **Activity Auditing**: Every critical action logged with IP & user context.
+- **Configurable Performance**: Pagination controls for properties, users, admin lists.
+- **Extensible Design**: Modular models and forms, structured configuration for environment overrides.
 
 ---
 
 ## ✨ Features
 
 ### 🏠 Property Features
-- ✅ Create, Read, Update, Delete (CRUD) operations for properties
-- ✅ Multiple property types: Residential, Commercial, Agricultural, Industrial
-- ✅ Multiple image uploads with primary image selection
-- ✅ YouTube/Vimeo video integration
-- ✅ Document attachments (PDFs, DOCs)
-- ✅ Property status tracking (Available, Reserved, Sold)
-- ✅ Featured property highlighting
-- ✅ View and share counters
-- ✅ Location with GPS coordinates (Latitude/Longitude)
-- ✅ Advanced filtering and sorting
+- ✅ CRUD operations for properties
+- ✅ Multiple property categories (Residential Plot, Commercial Plot, Agricultural Land, Industrial Plot)
+- ✅ Featured property highlighting & badge
+- ✅ Status workflow: Available → Reserved → Sold
+- ✅ View counter (auto-increment on detail view)
+- ✅ Share counter (via `/share/<id>` route)
+- ✅ Multiple image uploads with primary image auto-selection
+- ✅ YouTube/Vimeo video embedding (multi-URL input)
+- ✅ Document attachments (PDF, DOC, DOCX) with stored size metadata
+- ✅ GPS coordinates (latitude / longitude)
+- ✅ Advanced filtering (type, min/max price, location substring, sort by price/area/date)
+- ✅ Pagination support (configurable)
+- ✅ Secure file naming with timestamp + sanitized original name
 
 ### 👥 User Features
-- ✅ User registration and authentication
-- ✅ Personal dashboard
-- ✅ Favorite properties management
-- ✅ Property alerts with custom criteria
-- ✅ Site visit booking system
-- ✅ Enquiry submission
-- ✅ Activity history
+- ✅ Registration (password hashing, uniqueness validation)
+- ✅ Login / logout sessions
+- ✅ Dashboard (favorites, alerts, bookings summary)
+- ✅ Favorite management (toggle endpoint)
+- ✅ Property alerts (min/max price, type, location match)
+- ✅ Automatic alert email when new property matches criteria
+- ✅ Site visit booking with date + time slot & visitor info
+- ✅ Booking cancellation
+- ✅ Enquiry submission (linked optionally to a property)
+- ✅ Document downloads (with activity logging)
+- ✅ Basic activity visibility (e.g., favorites/bookings history)
 
 ### 🔐 Admin Features
-- ✅ Secure admin login
-- ✅ Comprehensive dashboard with statistics
-- ✅ Property management interface
-- ✅ User management
-- ✅ Enquiry management
-- ✅ Booking management
-- ✅ Analytics and reports
-- ✅ Activity logs
+- ✅ Secure login (session flag `admin_logged_in`)
+- ✅ Dashboard KPIs (properties, users, bookings, enquiries, views, shares)
+- ✅ Property add/edit/delete (with file lifecycle cleanup)
+- ✅ Inline video list replacement on edit
+- ✅ Image & document selective deletion endpoints
+- ✅ Booking management (status: Pending, Confirmed, Cancelled, Completed)
+- ✅ Enquiry management (status: New, Contacted, Closed)
+- ✅ User list view
+- ✅ Analytics panel (distributions & trends)
+- ✅ Email test utility
+- ✅ Activity log capture for every admin event
 
 ### 📊 Analytics & Reporting
-- ✅ Total properties, users, bookings, enquiries
-- ✅ Property type distribution
-- ✅ Monthly property additions
-- ✅ Most viewed properties
-- ✅ User activity tracking
+- ✅ Total entities: properties, users, bookings, enquiries
+- ✅ Property type distribution grouped counts
+- ✅ Monthly additions (last ~6 months bucketed by year-month)
+- ✅ Top viewed properties (limit configurable)
+- ✅ Global view + share aggregations
+- ✅ Recent activity stream (last N actions)
+
+### 📧 Email Notification Use Cases
+- Enquiry received (admin + user)
+- Booking created (admin + visitor)
+- Booking status changed (visitor)
+- Enquiry status changed (enquirer)
+- Property alert triggered (matching user)
+- Admin test email endpoint
+
+### 🧾 Logging & Auditing
+- ActivityLog model stores: action, description, user_type (admin/user/guest/system), user_id, IP, timestamp.
 
 ---
 
 ## 🛠 Technology Stack
 
 ### Backend
-- **Flask 2.3.3** - Python web framework
-- **SQLAlchemy 3.0.5** - SQL toolkit and ORM
-- **Flask-WTF 1.1.1** - Form handling and validation
-- **Werkzeug 2.3.7** - WSGI utility library
-- **Python-dotenv 1.0.0** - Environment variable management
+- **Flask 2.3.3**
+- **SQLAlchemy 3.0.5**
+- **Flask-WTF / WTForms**
+- **Werkzeug 2.3.7** (security, utilities)
+- **Flask-Mail** (transactional emails)
+- **Python-dotenv** (env configuration)
+- **SQLite** (default; interchangeable with PostgreSQL/MySQL)
 
 ### Frontend
-- **HTML5** - Structure and content (56.3%)
-- **CSS3** - Styling and animations (20.1%)
-- **JavaScript** - Interactive features (6.5%)
-- **Bootstrap 5** - Responsive framework
-- **Font Awesome** - Icons
-
-### Database
-- **SQLite** - Development database (easily upgradable to PostgreSQL/MySQL)
+- **HTML5 / Jinja2 Templates**
+- **CSS3 / Bootstrap 5**
+- **JavaScript (Vanilla)**
+- **Font Awesome Icons**
 
 ### Security
-- **Werkzeug Security** - Password hashing
-- **Flask Sessions** - Secure session management
-- **CSRF Protection** - Form security
+- Password hashing (Werkzeug)
+- CSRF protection via Flask-WTF
+- Session lifetime control
+- Filename sanitization & extension validation
+
+---
+
+## 🧱 Architecture & Internals
+
+| Layer | Responsibility |
+|-------|----------------|
+| `app.py` | Route definitions, decorators, helper utilities, upload handling, email dispatch, business logic orchestration |
+| `models.py` | ORM models: Property, PropertyImage, PropertyVideo, PropertyDocument, Enquiry, User, Favorite, PropertyAlert, Booking, Admin, ActivityLog |
+| `forms.py` | WTForms definitions with validation constraints |
+| `config.py` | Environment-driven configuration (DB, uploads, mail, pagination, admin credentials) |
+| `seed_data.py` | One-time seeding script creating sample properties (images/videos), demo users, admin credentials output |
+| `templates/` | Segregated admin/user/public HTML templates |
+| `static/uploads/` | Runtime persisted assets (images/videos/documents) |
+| `static/images/` | Project and UI assets |
+| Activity Logging | Centralized via `log_activity()` helper in `app.py` |
+| Alert Matching | `check_and_send_alerts(property)` executes matching & notifications after property creation |
+
+### Data Flow Example: Add Property
+1. Admin submits form (images/videos/documents).
+2. Server validates & persists Property row.
+3. Uploads saved with timestamped names → PropertyImage / PropertyVideo / PropertyDocument rows.
+4. `log_activity('add_property', ...)` persists activity.
+5. `check_and_send_alerts(property)` finds active alerts & emails matched users.
+6. Redirect with success flash.
 
 ---
 
@@ -127,34 +185,33 @@ This **Real Estate Website** is a comprehensive property management platform des
 ```
 Real-Estate-Website/
 │
-├── app.py                      # Main application file with all routes
-├── config.py                   # Configuration settings
-├── models.py                   # Database models
-├── forms.py                    # WTForms definitions
-├── seed_data.py               # Database seeding script
-├── requirements.txt           # Python dependencies
-├── .env                       # Environment variables
-├── .gitignore                # Git ignore rules
+├── app.py
+├── config.py
+├── models.py
+├── forms.py
+├── seed_data.py
+├── requirements.txt
+├── .env
+├── .gitignore
 │
-├── static/                    # Static files
-│   ├── css/                  # Stylesheets
-│   ├── js/                   # JavaScript files
-│   ├── images/               # Static images
-│   ├── favicon.ico          # Site icon
-│   └── uploads/             # User uploaded files
-│       ├── images/          # Property images
-│       ├── videos/          # Property videos
-│       └── documents/       # Property documents
+├── static/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   ├── favicon.ico
+│   └── uploads/
+│       ├── images/
+│       ├── videos/
+│       └── documents/
 │
-├── templates/                 # HTML templates
-│   ├── base.html             # Base template
-│   ├── index.html            # Homepage
-│   ├── properties.html       # Property listings
-│   ├── property_detail.html  # Property details
-│   ├── contact.html          # Contact page
-│   ├── 404.html              # Error page
-│   │
-│   ├── admin/                # Admin templates
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── properties.html
+│   ├── property_detail.html
+│   ├── contact.html
+│   ├── 404.html
+│   ├── admin/
 │   │   ├── login.html
 │   │   ├── dashboard.html
 │   │   ├── properties.html
@@ -164,16 +221,15 @@ Real-Estate-Website/
 │   │   ├── bookings.html
 │   │   ├── users.html
 │   │   └── analytics.html
-│   │
-│   └── user/                 # User templates
+│   └── user/
 │       ├── register.html
 │       ├── login.html
 │       ├── dashboard.html
 │       ├── favorites.html
 │       └── create_alert.html
 │
-└── instance/                  # Instance-specific files
-    └── realestate.db         # SQLite database (auto-generated)
+└── instance/
+    └── realestate.db
 ```
 
 ---
@@ -181,47 +237,34 @@ Real-Estate-Website/
 ## 🚀 Installation
 
 ### Prerequisites
+- Python 3.8+
+- pip
+- Git
 
-Before you begin, ensure you have the following installed:
-- **Python 3.8+** - [Download Python](https://www.python.org/downloads/)
-- **pip** - Python package installer (comes with Python)
-- **Git** - [Download Git](https://git-scm.com/downloads/)
-
-### Step 1: Clone the Repository
+### Step 1: Clone
 
 ```bash
-# Clone the repository
 git clone https://github.com/Atharva0177/Real-Estate-Website.git
-
-# Navigate to project directory
 cd Real-Estate-Website
 ```
 
-
-
-### Step 2: Create Virtual Environment
+### Step 2: Virtual Environment
 
 ```bash
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-
-# On Windows:
+# Windows
 venv\Scripts\activate
-
-# On macOS/Linux:
+# macOS/Linux
 source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+### Step 3: Dependencies
 
 ```bash
-# Install required packages
 pip install -r requirements.txt
 ```
 
-**Requirements include:**
+`requirements.txt`:
 ```
 Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
@@ -234,110 +277,108 @@ python-dotenv==1.0.0
 Werkzeug==2.3.7
 ```
 
-### Step 4: Configure Environment Variables
-
-The `.env` file is already configured with default values:
+### Step 4: Environment Variables (.env)
 
 ```env
 SECRET_KEY=qwertyuiop
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=admin123
 DATABASE_URL=sqlite:///realestate.db
+
+# Optional mail settings (override config defaults)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USE_SSL=false
+MAIL_USERNAME=your_email@example.com
+MAIL_PASSWORD=your_password
+MAIL_DEFAULT_SENDER=your_email@example.com
 ```
 
-**⚠️ Important:** Change these values in production!
+Change all secrets for production.
 
-### Step 5: Initialize Database
+### Step 5: Seed Database
 
 ```bash
-# Run the seed data script to create database and sample data
 python seed_data.py
 ```
 
-This will:
-- Create all database tables
-- Add 9 sample properties with images
-- Create 2 demo user accounts
-- Display login credentials
+Creates:
+- Tables
+- 9 sample properties
+- 2 demo users
+- Outputs admin + user credentials
 
-
-
-### Step 6: Run the Application
+### Step 6: Run App
 
 ```bash
-# Start the Flask development server
 python app.py
 ```
 
-The application will be available at: **http://localhost:8000**
-
-```
- * Running on http://0.0.0.0:8000
- * Debug mode: on
-```
+Access at: `http://localhost:8000`
 
 ---
 
 ## ⚙️ Configuration
 
-### config.py Settings
+`config.py` excerpt:
 
 ```python
 class Config:
-    # Security
-    SECRET_KEY = 'your-secret-key-change-in-production'
-    
-    # Database
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///realestate.db'
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///realestate.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
-    # File Uploads
-    UPLOAD_FOLDER = os.path.join('static', 'uploads')
+
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/uploads')
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'ogg', 'pdf', 'doc', 'docx'}
-    
-    # Session
+    ALLOWED_EXTENSIONS = {'png','jpg','jpeg','gif','mp4','webm','ogg','pdf','doc','docx'}
+
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
-    
-    # Pagination
-    PROPERTIES_PER_PAGE = 9
-    
-    # Admin Credentials
-    ADMIN_USERNAME = 'admin'
-    ADMIN_PASSWORD = 'admin123'  # ⚠️ Change in production!
+
+    PROPERTIES_PER_PAGE = int(os.getenv('PROPERTIES_PER_PAGE', 9))
+    ADMIN_PAGE_SIZE = int(os.getenv('ADMIN_PAGE_SIZE', 20))
+    USER_PAGE_SIZE = int(os.getenv('USER_PAGE_SIZE', 12))
+
+    ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'true').lower() == 'true'
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'false').lower() == 'true'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
 ```
 
-### Production Deployment Checklist
-
-- [ ] Change `SECRET_KEY` to a random secure value
-- [ ] Update `ADMIN_USERNAME` and `ADMIN_PASSWORD`
-- [ ] Switch to PostgreSQL or MySQL database
-- [ ] Set `DEBUG = False`
-- [ ] Configure proper email settings for notifications
-- [ ] Set up HTTPS/SSL
-- [ ] Configure file storage (AWS S3, etc.)
-- [ ] Set up backup system
+### Production Checklist
+- [ ] Replace `SECRET_KEY`
+- [ ] Rotate admin credentials
+- [ ] Switch to PostgreSQL/MySQL
+- [ ] Configure proper SMTP credentials
+- [ ] Serve behind HTTPS
+- [ ] Offload static/uploads to CDN or S3
+- [ ] Enable backups & monitoring
+- [ ] Set `DEBUG=False` when deploying
 
 ---
 
 ## 📖 Usage
 
-### Default Login Credentials
-
-#### 🔐 Admin Access
+### Admin Login
 ```
 URL: http://localhost:8000/admin/login
 Username: admin
 Password: admin123
 ```
 
-#### 👤 Demo User Account
+### Demo User
 ```
 Email: demo@example.com
 Password: demo123
 ```
 
-#### 👤 Atharva User Account
+### Atharva User
 ```
 Email: atharva@example.com
 Password: atharva123
@@ -349,290 +390,329 @@ Password: atharva123
 
 ### Homepage
 ![Homepage](static/images/home.png)
-*Modern and clean homepage with featured properties*
+*Featured properties and search*
 
 ### Property Listings
 ![Property Listings](static/images/listings.png)
-*Advanced search and filter options with property cards*
+*Filters & pagination*
 
 ### Property Details
 ![Property Details](static/images/details.png)
-*Detailed property view with image gallery, videos, and booking form*
+*Gallery, videos, booking form*
 
 ### Admin Dashboard
 ![Admin Dashboard](static/images/admin.png)
-*Comprehensive analytics and statistics*
+*KPIs & recent items*
 
 ### User Dashboard
 ![User Dashboard](static/images/user.png)
-*Personal dashboard with favorites and bookings*
+*Favorites & alerts overview*
 
 ---
 
 ## 🗄️ Database Models
 
-### Property Model
-```python
-class Property(db.Model):
-    - id (Primary Key)
-    - title
-    - description
-    - property_type (Residential/Commercial/Agricultural/Industrial)
-    - price
-    - area
-    - location
-    - address
-    - latitude, longitude
-    - status (Available/Reserved/Sold)
-    - featured (Boolean)
-    - views, shares (Integer)
-    - created_at, updated_at (DateTime)
-    
-    Relationships:
-    - images (One-to-Many)
-    - videos (One-to-Many)
-    - documents (One-to-Many)
-    - favorites (One-to-Many)
-    - bookings (One-to-Many)
+### Property
+```
+id, title, description, property_type, price, area,
+location, address, latitude, longitude,
+status, featured, views, shares,
+created_at, updated_at
+Relationships: images, videos, documents, favorites, bookings
 ```
 
-### User Model
-```python
-class User(db.Model):
-    - id (Primary Key)
-    - name
-    - email (Unique)
-    - phone
-    - password_hash
-    - created_at (DateTime)
-    
-    Relationships:
-    - favorites (One-to-Many)
-    - alerts (One-to-Many)
-    - bookings (One-to-Many)
+### User
+```
+id, name, email (unique), phone, password_hash, created_at
+Relationships: favorites, alerts, bookings
 ```
 
-### Booking Model
-```python
-class Booking(db.Model):
-    - id (Primary Key)
-    - user_id (Foreign Key)
-    - property_id (Foreign Key)
-    - booking_date
-    - booking_time
-    - visitor_name
-    - visitor_email
-    - visitor_phone
-    - number_of_visitors
-    - message
-    - status (Pending/Confirmed/Cancelled/Completed)
-    - created_at (DateTime)
+### Booking
+```
+id, user_id, property_id,
+booking_date, booking_time,
+visitor_name, visitor_email, visitor_phone,
+number_of_visitors, message, status, created_at
 ```
 
-### Other Models
-- **PropertyImage** - Property images with primary flag
-- **PropertyVideo** - YouTube/Vimeo video URLs
-- **PropertyDocument** - Property-related documents
-- **Enquiry** - Contact enquiries
-- **Favorite** - User saved properties
-- **PropertyAlert** - User property alerts
-- **ActivityLog** - System activity tracking
+### Other
+- PropertyImage (primary flag)
+- PropertyVideo (url + type)
+- PropertyDocument (name, url, type, size)
+- Enquiry (name, email, phone, message, status)
+- Favorite (user ↔ property)
+- PropertyAlert (criteria, active flag)
+- ActivityLog (action, description, user_type, user_id, ip, timestamp)
+- Admin (username/password hash)
 
 ---
 
 ## 🔗 API Routes
 
-### Public Routes
-
+### Public
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | Homepage with featured properties |
-| GET | `/properties` | Property listings with filters |
-| GET | `/property/<id>` | Property details |
+| GET | `/` | Homepage (featured + recent) |
+| GET | `/properties` | Listings (filters & sort) |
+| GET | `/property/<id>` | Property detail (views++) |
 | POST | `/enquiry` | Submit enquiry |
-| GET | `/contact` | Contact page |
+| GET | `/contact` | Contact form |
+| POST | `/share/<id>` | Increment share counter |
+| GET | `/document/download/<doc_id>` | Download property document |
 
-### User Authentication Routes
-
+### User Auth
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET/POST | `/user/register` | User registration |
-| GET/POST | `/user/login` | User login |
-| GET | `/user/logout` | User logout |
-| GET | `/user/dashboard` | User dashboard |
+| GET/POST | `/user/register` | Register |
+| GET/POST | `/user/login` | Login |
+| GET | `/user/logout` | Logout |
+| GET | `/user/dashboard` | Dashboard |
 
-### User Feature Routes
-
+### User Features
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/favorite/toggle/<id>` | Toggle favorite property |
-| GET | `/user/favorites` | View favorites |
-| GET/POST | `/alert/create` | Create property alert |
-| POST | `/alert/delete/<id>` | Delete alert |
-| POST | `/booking/create/<id>` | Book site visit |
-| POST | `/booking/cancel/<id>` | Cancel booking |
+| POST | `/favorite/toggle/<property_id>` | Toggle favorite |
+| GET | `/user/favorites` | Favorites list |
+| GET/POST | `/alert/create` | Create alert |
+| POST | `/alert/delete/<alert_id>` | Delete alert |
+| POST | `/booking/create/<property_id>` | Create booking |
+| POST | `/booking/cancel/<booking_id>` | Cancel booking |
 
-### Admin Routes
-
+### Admin Auth
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET/POST | `/admin/login` | Admin login |
 | GET | `/admin/logout` | Admin logout |
-| GET | `/admin/dashboard` | Admin dashboard |
+
+### Admin Core
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/admin/dashboard` | KPI overview |
 | GET | `/admin/properties` | Manage properties |
-| GET/POST | `/admin/property/add` | Add new property |
+| GET/POST | `/admin/property/add` | Add property |
 | GET/POST | `/admin/property/edit/<id>` | Edit property |
 | POST | `/admin/property/delete/<id>` | Delete property |
-| GET | `/admin/enquiries` | Manage enquiries |
-| GET | `/admin/bookings` | Manage bookings |
-| GET | `/admin/users` | Manage users |
-| GET | `/admin/analytics` | View analytics |
+| POST | `/admin/image/delete/<id>` | Delete image |
+| POST | `/admin/document/delete/<id>` | Delete document |
+| GET | `/admin/enquiries` | Enquiry list |
+| POST | `/admin/enquiry/status/<id>` | Update enquiry status |
+| POST | `/admin/enquiry/delete/<id>` | Delete enquiry |
+| GET | `/admin/bookings` | Booking list |
+| POST | `/admin/booking/status/<id>` | Update booking status |
+| POST | `/admin/booking/delete/<id>` | Delete booking |
+| GET | `/admin/users` | User list |
+| GET | `/admin/analytics` | Analytics panel |
+| GET | `/admin/test-email` | Send test email |
 
 ---
 
 ## 🔐 Admin Panel
 
-### Access Admin Panel
+Navigate: `http://localhost:8000/admin/login`
 
-Navigate to: `http://localhost:8000/admin/login`
+Features:
+- Dashboard metrics & recent items
+- Property CRUD with media & alerts trigger
+- Enquiry triage (status transitions)
+- Booking lifecycle management
+- User overview
+- Analytics visualization
+- Email system test
+- Activity logging trail
 
-![Admin Login](static/images/admin_login.png)
+---
 
-### Admin Features
+## 📈 Admin Analytics & Reporting
 
-#### 📊 Dashboard
-- Real-time statistics
-- Total properties, users, bookings, enquiries
-- Total views and shares
-- Recent activities log
+Metrics:
+- Counts: total properties/users/bookings/enquiries
+- Availability breakdown (available/reserved/sold)
+- Aggregated views & shares
+- Distribution: property_type grouped counts
+- Monthly addition trend (last 6 months)
+- Top viewed properties (top 5)
+- Recent activities (latest 10)
 
-#### 🏠 Property Management
-- Add new properties with images, videos, documents
-- Edit existing properties
-- Delete properties
-- Mark as featured
-- Change status (Available/Reserved/Sold)
-
-#### 📝 Enquiry Management
-- View all enquiries
-- Filter by status (New/Contacted/Closed)
-- Update enquiry status
-- View property details
-
-#### 📅 Booking Management
-- View all site visit bookings
-- Filter by status (Pending/Confirmed/Cancelled/Completed)
-- Update booking status
-- View booking details
-
-#### 👥 User Management
-- View all registered users
-- User details and activity
-- User statistics
-
-#### 📈 Analytics
-- Property type distribution
-- Monthly property additions
-- Most viewed properties
-- User engagement metrics
+All computed via SQLAlchemy queries (grouped, ordered, aggregated functions).
 
 ---
 
 ## 👤 User Features
 
-### User Dashboard
+Dashboard includes:
+- Favorites (quick access + toggle)
+- Alerts (criteria & activation)
+- Bookings (status & cancellation)
+- Potential activity actions like downloads tracked
 
-Access at: `http://localhost:8000/user/dashboard`
+Alert Trigger Logic:
+- When new property added:
+  - Matches if (type matches OR alert type empty) AND
+    min_price <= property.price <= max_price (if provided) AND
+    location substring match (case-insensitive) AND
+    alert is active.
+  - Sends email with property summary & direct link.
 
-![User Dashboard](static/images/user.png)
+---
 
-#### ❤️ Favorites
-- Save favorite properties
-- Quick access to saved properties
-- One-click toggle
+## 🛡 Security & Validation
 
-#### 🔔 Property Alerts
-- Set custom search criteria
-- Get notified of matching properties
-- Manage multiple alerts
+- WTForms validators: length, email format, numeric ranges
+- Password hashing (generate/check functions)
+- CSRF tokens on forms
+- Secure filename handling (`secure_filename`) + timestamp prefix to avoid collisions
+- Extension whitelist enforced from `Config.ALLOWED_EXTENSIONS`
+- Session-based auth gates (`@admin_login_required`, `@user_login_required`)
+- Size-limited uploads (`MAX_CONTENT_LENGTH = 50MB`)
+- Document size stored (human readable KB/MB string)
 
-#### 📅 My Bookings
-- View scheduled site visits
-- Check booking status
-- Cancel bookings
+---
 
-#### 📊 Activity History
-- View browsing history
-- Track enquiries
-- Download documents
+## ✉️ Email Notification System
+
+Events & Templates (plain text):
+- Enquiry received (admin + user acknowledgment)
+- Booking created (admin + visitor confirmation)
+- Booking status change (visitor)
+- Enquiry status change (enquirer)
+- Alert triggered (matching users)
+- Admin test email
+
+Environment-dependent:
+- Requires `MAIL_SERVER`, `MAIL_PORT`, TLS/SSL flags, credentials, and default sender.
+- Graceful fallback if mail settings incomplete (error flashes).
+
+---
+
+## 🧾 Activity Logging
+
+`ActivityLog` schema:
+```
+id, action, description, user_type, user_id, ip_address, created_at
+```
+Examples of logged actions:
+- `user_register`, `user_login`, `add_property`, `edit_property`, `delete_property`
+- `create_booking`, `cancel_booking`
+- `create_alert`, `delete_alert`
+- `submit_enquiry`, `update_enquiry_status`
+- `update_booking_status`, `share_property`, `download_document`
+- `admin_login`, `admin_logout`, `test_email`
+Used for audit, debugging, analytics, potential future security anomaly detection.
 
 ---
 
 ## 🎨 Customization
 
-### Changing Colors and Branding
-
-Edit the CSS files in `static/css/` directory:
-
+### Branding / Theme
+Edit `static/css/` (create theme variables or modify existing CSS):
 ```css
-/* Primary brand color */
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2ecc71;
-    --danger-color: #e74c3c;
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --danger-color: #e74c3c;
 }
 ```
 
-### Adding New Property Types
+### Property Types
+Extend choices in `forms.py > PropertyForm` & `PropertyAlertForm`.
 
-Edit `forms.py`:
-
-```python
-property_type = SelectField('Property Type', 
-    choices=[
-        ('Residential Plot', 'Residential Plot'),
-        ('Commercial Plot', 'Commercial Plot'),
-        ('Agricultural Land', 'Agricultural Land'),
-        ('Industrial Plot', 'Industrial Plot'),
-        ('Your New Type', 'Your New Type'),  # Add here
-    ],
-    validators=[DataRequired()]
-)
+### Pagination
+Adjust in `.env`:
+```
+PROPERTIES_PER_PAGE=12
+ADMIN_PAGE_SIZE=30
+USER_PAGE_SIZE=15
 ```
 
 ---
 
 ## 🧪 Testing
 
-### Run Tests
-
+Install test libs:
 ```bash
-# Install testing dependencies
 pip install pytest pytest-flask
-
-# Run tests
-pytest tests/
 ```
 
-### Manual Testing Checklist
+Run:
+```bash
+pytest
+```
 
-- [x] User registration and login
+Manual Checklist:
+- [x] User register/login
 - [x] Admin login
-- [x] Property creation with images
-- [x] Property search and filters
-- [x] Favorite property functionality
-- [x] Booking system
-- [x] Enquiry submission
-- [x] File uploads
-- [x] Responsive design on mobile
+- [x] Property add with images/videos/documents
+- [x] Alert creation & trigger (add matching property)
+- [x] Booking create/cancel/status update
+- [x] Enquiry submit & status change
+- [x] Favorite toggle
+- [x] Document download
+- [x] Share counter increment
+- [x] Analytics renders without error
+- [x] Email sending flows (with real creds)
+- [x] Mobile responsiveness
 
 ---
 
+## ☁ Deployment & Scaling
 
+| Aspect | Recommendation |
+|--------|---------------|
+| WSGI Server | Gunicorn / uWSGI behind Nginx |
+| DB | PostgreSQL for concurrency & indexing |
+| File Storage | S3 / GCS + signed URLs |
+| Caching | Redis (sessions, activity feed, analytics precompute) |
+| Background Tasks | Celery or RQ for email & alert processing |
+| Monitoring | Prometheus + Grafana / APM (New Relic) |
+| Security | HTTPS termination, secure cookie flags, rate limiting |
+| Migrations | Alembic for schema evolution |
+| Containerization | Dockerfile + multi-stage build |
+| Scaling | Horizontal (stateless app) + CDN for static assets |
+
+Performance Opportunities:
+- Pre-calculate monthly stats nightly
+- Add composite indexes (e.g., `property_type`, `status`, `created_at`)
+- Offload heavy email bursts to async queue
+
+---
+
+## 🗂 Changelog / What's New
+
+Latest Enhancements (from code analysis compared to initial conceptual README):
+- Added share counter & route (`/share/<property_id>`)
+- Activity logging system (IP + user context)
+- Document metadata (size string, download endpoint)
+- Video embedding multi-URL support (YouTube/Vimeo autodetection)
+- Alert trigger emailing after property creation
+- Booking status update notifications
+- Enquiry status change notifications
+- Admin test email endpoint
+- Image/document selective deletion routes
+- Configurable pagination for properties/admin/users
+- Extended analytics: top viewed, monthly addition trend, distribution
+- Centralized helper for alert matching `check_and_send_alerts`
+- Timestamped secure uploads with cleaned filenames
+- Improved multi-file validation for images/documents
+
+(If you maintain semantic versioning, start a `CHANGELOG.md` and tag releases.)
+
+---
+
+## 🎯 Future Enhancements
+
+- [ ] SMS alerts for bookings
+- [ ] Virtual property tours (360° view)
+- [ ] Chat system (user ↔ admin)
+- [ ] Multi-language support (Flask-Babel)
+- [ ] Advanced analytics with charts (Chart.js)
+- [ ] Social media integration
+- [ ] Async task queue + retry logic
+
+---
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License
 
 ```
 MIT License
@@ -640,38 +720,20 @@ MIT License
 Copyright (c) 2025 Atharva
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software...
+...
 ```
 
----
+See [LICENSE](LICENSE) for full text.
 
+---
 
 ## 🙏 Acknowledgments
 
-- **Flask** - Excellent Python web framework
-- **Bootstrap** - Responsive CSS framework
-- **Font Awesome** - Beautiful icons
-- **Unsplash** - Free high-quality images
-- **SQLAlchemy** - Powerful ORM
-
----
-
-
-## 🎯 Future Enhancements
-
-- [ ] Email notifications
-- [ ] SMS alerts for bookings
-- [ ] Payment gateway integration
-- [ ] Map integration (Google Maps)
-- [ ] Virtual property tours (360° view)
-- [ ] Chat system between users and admins
-- [ ] Multi-language support
-- [ ] Mobile app (React Native)
-- [ ] Advanced analytics with charts
-- [ ] Social media integration
+- [Flask](https://flask.palletsprojects.com/)
+- [Bootstrap](https://getbootstrap.com/)
+- [Font Awesome](https://fontawesome.com/)
+- [Unsplash](https://unsplash.com/) (placeholder images)
+- [SQLAlchemy](https://www.sqlalchemy.org/)
 
 ---
 
@@ -682,12 +744,26 @@ copies of the Software...
 ![Last Commit](https://img.shields.io/github/last-commit/Atharva0177/Real-Estate-Website)
 
 **Composition:**
-- HTML: 56.3%
-- CSS: 20.1%
-- Python: 17.1%
+- HTML: 54%
+- CSS: 20.5%
+- Python: 19%
 - JavaScript: 6.5%
 
 ---
 
 
+### ✅ Quick Start (TL;DR)
+
+```bash
+git clone https://github.com/Atharva0177/Real-Estate-Website.git
+cd Real-Estate-Website
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python seed_data.py
+python app.py
+# Visit http://localhost:8000
+```
+
+---
 
