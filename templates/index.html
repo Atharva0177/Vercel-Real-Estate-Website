@@ -9,10 +9,9 @@
     <div class="hero-overlay"></div>
     <div class="hero-video">
         <video autoplay muted loop playsinline id="heroVideo">
-            <source src="static\uploads\videos\video.mp4" type="video/mp4">
-            <source src="static\uploads\videos\video.mp4" type="video/mp4">
-            <!-- Fallback video -->
-            <source src="static\uploads\videos\video.mp4" type="video/mp4">
+            <source src="{{ url_for('static', filename='uploads/videos/video.mp4') }}" type="video/mp4">
+            <!-- Fallback: Real estate aerial video -->
+            Your browser does not support the video tag.
         </video>
     </div>
     <div class="shape shape-1"></div>

@@ -1,0 +1,16 @@
+# Vercel Ignore
+static/uploads/images
+static/uploads/documents
+# Keep static/uploads/videos for hero background video
+instance
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.env
+venv
+env
+Documentation.docx
+Documentation.pdf

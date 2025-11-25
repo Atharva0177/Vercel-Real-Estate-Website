@@ -26,3 +26,4 @@ migrations/
 # Uploads and cache
 static/uploads/
 *.DS_Store
+.vercel
