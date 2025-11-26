@@ -657,3 +657,46 @@ html, body {
         padding: 0.6rem;
     }
 }
+
+
+/* Document List Alignment Fix */
+.documents-list .document-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    margin-bottom: 10px !important;
+    gap: 10px !important;
+}
+
+.documents-list .document-item > div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.documents-list .document-item .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Mobile specific fixes */
+@media (max-width: 768px) {
+    .documents-list .document-item {
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+    
+    .documents-list .document-item > div {
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+    
+    .documents-list .document-item .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
