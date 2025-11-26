@@ -600,15 +600,14 @@ html, body {
 }
 
 .btn-danger {
-    background: #e74c3c;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
-    justify-content: center;
-    width: 15px;
-    height: 15px;
+    border: none;
 }
 
 .btn-danger:hover {
-    background: #c0392b;
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-2px);
 }
 
 /* ==========================================================

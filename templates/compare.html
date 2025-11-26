@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+
+{% block title %}Compare Properties - Premium Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+.comparison-hero {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 2rem 0;
+  margin-top: 70px;
+}
+
+.comparison-container {
+  padding: 3rem 0;
+  background: #f5f6fa;
+}
+
+.comparison-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.comparison-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.comparison-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.comparison-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-family: 'Playfair Display', serif;
+}
+
+.card-location {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.card-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  background: #f7f9fc;
+  border-radius: 8px;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(244, 67, 54, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.remove-btn:hover {
+  background: #f44336;
+  transform: scale(1.1);
+}
+
+.empty-slot {
+  background: #f7f9fc;
+  border: 2px dashed #d9dde3;
+  border-radius: 15px;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.empty-slot i {
+  font-size: 3rem;
+  color: #d9dde3;
+  margin-bottom: 1rem;
+}
+
+.empty-slot p {
+  color: #999;
+  margin-bottom: 1rem;
+}
+
+.btn-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-browse:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.comparison-actions {
+  text-align: center;
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="comparison-hero">
+  <div class="container">
+    <h1>Compare Properties</h1>
+    <p>Select up to 4 properties to compare side-by-side</p>
+  </div>
+</section>
+
+<section class="comparison-container">
+  <div class="container">
+    <div id="comparisonGrid" class="comparison-grid">
+      <!-- Comparison cards will be inserted here by JavaScript -->
+    </div>
+    
+    <div class="comparison-actions">
+      <a href="{{ url_for('properties') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add More Properties
+      </a>
+      <button onclick="clearComparison()" class="btn btn-secondary">
+        <i class="fas fa-trash"></i> Clear All
+      </button>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Get comparison data from sessionStorage
+function getComparisonData() {
+  const data = sessionStorage.getItem('propertyComparison');
+  return data ? JSON.parse(data) : [];
+}
+
+// Remove property from comparison
+function removeFromComparison(propertyId) {
+  let comparison = getComparisonData();
+  comparison = comparison.filter(p => p.id !== propertyId);
+  sessionStorage.setItem('propertyComparison', JSON.stringify(comparison));
+  renderComparison();
+  updateComparisonBadge();
+}
+
+// Clear all comparisons
+function clearComparison() {
+  if (confirm('Are you sure you want to clear all comparisons?')) {
+    sessionStorage.removeItem('propertyComparison');
+    renderComparison();
+    updateComparisonBadge();
+  }
+}
+
+// Format price
+function formatPrice(price) {
+  if (price >= 10000000) {
+    return '₹' + (price / 10000000).toFixed(2) + ' Cr';
+  } else if (price >= 100000) {
+    return '₹' + (price / 100000).toFixed(2) + ' L';
+  }
+  return '₹' + price.toLocaleString('en-IN');
+}
+
+// Render comparison grid
+function renderComparison() {
+  const grid = document.getElementById('comparisonGrid');
+  const properties = getComparisonData();
+  
+  grid.innerHTML = '';
+  
+  if (properties.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-slot" style="grid-column: 1 / -1;">
+        <i class="fas fa-balance-scale"></i>
+        <p>No properties selected for comparison</p>
+        <a href="{{ url_for('properties') }}" class="btn-browse">
+          <i class="fas fa-search"></i> Browse Properties
+        </a>
+      </div>
+    `;
+    return;
+  }
+  
+  // Render each property
+  properties.forEach(property => {
+    const card = document.createElement('div');
+    card.className = 'comparison-card';
+    card.innerHTML = `
+      <button class="remove-btn" onclick="removeFromComparison(${property.id})" title="Remove">
+        <i class="fas fa-times"></i>
+      </button>
+      ${property.image_url ? `<img src="${property.image_url}" alt="${property.title}" class="card-image" />` : ''}
+      <div class="card-body">
+        <div class="card-title">${property.title}</div>
+        <div class="card-location">
+          <i class="fas fa-map-marker-alt"></i> ${property.location}
+        </div>
+        <div class="card-price">${formatPrice(property.price)}</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <span class="detail-label">Area</span>
+            <span class="detail-value">${Math.round(property.area)} sq ft</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Price/sq ft</span>
+            <span class="detail-value">₹${Math.round(property.price / property.area)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">${property.property_type}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">${property.status}</span>
+          </div>
+        </div>
+        <a href="/property/${property.id}" class="btn btn-primary" style="width:100%;justify-content:center;">
+          <i class="fas fa-eye"></i> View Details
+        </a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+  
+  // Add empty slots if less than 4 properties
+  for (let i = properties.length; i < 4; i++) {
+    const emptySlot = document.createElement('div');
+    emptySlot.className = 'empty-slot';
+    emptySlot.innerHTML = `
+      <i class="fas fa-plus-circle"></i>
+      <p>Add another property</p>
+      <a href="{{ url_for('properties') }}" class="btn-browse">
+        <i class="fas fa-search"></i> Browse
+      </a>
+    `;
+    grid.appendChild(emptySlot);
+  }
+}
+
+// Update comparison badge count
+function updateComparisonBadge() {
+  const badge = document.querySelector('.comparison-badge');
+  const count = getComparisonData().length;
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  renderComparison();
+  updateComparisonBadge();
+});
+</script>
+{% endblock %}

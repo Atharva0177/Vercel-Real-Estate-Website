@@ -148,9 +148,38 @@
                         <div class="form-group">
                             <label>{{ form.video_urls.label }}</label>
                             {{ form.video_urls(class="form-control", rows="4") }}
+                        
+                    <!-- Existing Documents -->
+                    {% if property.documents %}
+                    <div class="form-section">
+                        <h3>Current Documents</h3>
+                        <div class="documents-list">
+                            {% for doc in property.documents %}
+                            <div class="document-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #ddd;border-radius:5px;margin-bottom:10px;">
+                                <div>
+                                    <i class="fas fa-file-alt"></i> {{ doc.document_name }} 
+                                    <span style="color:#666;font-size:0.85em;">({{ doc.document_type }})</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteDocument({{ doc.id }})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
+                    {% endif %}
                     
+                    <div class="form-section">
+                        <h3>Add Documents</h3>
+                        
+                        <div class="form-group">
+                            <label>{{ form.documents.label }}</label>
+                            {{ form.documents(class="form-control") }}
+                            <p class="help-text">Upload additional property documents (PDF, DOC, DOCX)</p>
+                        </div>
+                    </div>
+
+                    
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-save"></i> Update Property
@@ -207,6 +236,30 @@ function confirmDelete(propertyId) {
     document.getElementById('deleteModal').style.display = 'flex';
 }
 
+
+function deleteDocument(docId) {
+    if (confirm('Are you sure you want to delete this document?')) {
+        fetch('/admin/document/delete/' + docId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting document: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+}
+
+
 function closeModal() {
     document.getElementById('deleteModal').style.display = 'none';
 }

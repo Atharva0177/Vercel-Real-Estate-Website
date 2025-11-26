@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+
+{% block title %}Property Map View - Premium Real Estate{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<!-- Leaflet MarkerCluster CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+<!-- Leaflet Draw CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+<style>
+/* Map Container */
+#map {
+  height: calc(100vh - 70px);
+  width: 100%;
+  margin-top: 70px;
+}
+
+/* Property Popup */
+.property-popup {
+  max-width: 280px;
+}
+
+.popup-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  margin: -12px -16px 12px;
+}
+
+.popup-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: #2c3e50;
+  font-family: 'Playfair Display', serif;
+}
+
+.popup-location {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.popup-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 8px 0;
+}
+
+.popup-details {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.popup-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.popup-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white !important;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  transition: all 0.3s ease;
+}
+
+.popup-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  color: white !important;
+}
+
+/* Map Controls */
+.map-controls {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  z-index: 1000;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  max-width: 300px;
+}
+
+.map-controls h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.filter-group {
+  margin-bottom: 12px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.filter-group select,
+.filter-group input {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #d9dde3;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.btn-apply-filter {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.btn-apply-filter:hover {
+  filter: brightness(1.1);
+}
+
+/* Layer Controls */
+.layer-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.layer-controls h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.layer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.layer-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.layer-toggle label {
+  cursor: pointer;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .map-controls {
+    top: 90px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .layer-controls {
+    bottom: 10px;
+    left: 10px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="map"></div>
+
+<!-- Map Controls -->
+<div class="map-controls">
+  <h3><i class="fas fa-filter"></i> Filter Properties</h3>
+  
+  <div class="filter-group">
+    <label>Property Type</label>
+    <select id="filterType">
+      <option value="">All Types</option>
+      <option value="Residential Plot">Residential Plot</option>
+      <option value="Commercial Plot">Commercial Plot</option>
+      <option value="Agricultural Land">Agricultural Land</option>
+      <option value="Industrial Plot">Industrial Plot</option>
+    </select>
+  </div>
+  
+  <div class="filter-group">
+    <label>Max Price (₹)</label>
+    <input type="number" id="filterPrice" placeholder="e.g., 10000000" />
+  </div>
+  
+  <div class="filter-group">
+    <label>Status</label>
+    <select id="filterStatus">
+      <option value="">All Status</option>
+      <option value="Available" selected>Available</option>
+      <option value="Reserved">Reserved</option>
+      <option value="Sold">Sold</option>
+    </select>
+  </div>
+  
+  <button class="btn-apply-filter" onclick="applyFilters()">
+    <i class="fas fa-check"></i> Apply Filters
+  </button>
+</div>
+
+<!-- Layer Controls -->
+<div class="layer-controls">
+  <h4><i class="fas fa-layer-group"></i> Map Layers</h4>
+  
+  <div class="layer-toggle">
+    <input type="checkbox" id="toggleAmenities" onchange="toggleAmenities(this.checked)" />
+    <label for="toggleAmenities">Show Nearby Amenities</label>
+  </div>
+  
+  <div class="layer-toggle">
+    <input type="checkbox" id="toggleDrawing" onchange="toggleDrawing(this.checked)" />
+    <label for="toggleDrawing">Draw Search Area</label>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Leaflet MarkerCluster JS -->
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<!-- Leaflet Draw JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script>
+let map;
+let markers;
+let allProperties = [];
+let amenitiesLayer;
+let drawnItems;
+let drawControl;
+
+// Initialize map
+function initMap() {
+  // Center of India (aproximately Mumbai)
+  map = L.map('map').setView([19.0760, 72.8777], 11);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Initialize marker cluster group
+  markers = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true
+  });
+  
+  map.addLayer(markers);
+  
+  // Initialize amenities layer
+  amenitiesLayer = L.layerGroup();
+  
+  // Initialize drawing layer
+  drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+  
+  // Load properties
+  loadProperties();
+}
+
+// Load properties from API
+async function loadProperties() {
+  try {
+    const response = await fetch('/api/properties');
+    allProperties = await response.json();
+    displayProperties(allProperties);
+  } catch (error) {
+    console.error('Error loading properties:', error);
+  }
+}
+
+// Display properties on map
+function displayProperties(properties) {
+  // Clear existing markers
+  markers.clearLayers();
+  
+  if (properties.length === 0) {
+    alert('No properties found matching your criteria.');
+    return;
+  }
+  
+  properties.forEach(property => {
+    if (property.latitude && property.longitude) {
+      const marker = L.marker([property.latitude, property.longitude]);
+      
+      // Create popup content
+      const popupContent = `
+        <div class="property-popup">
+          ${property.image_url ? `<img src="${property.image_url}" alt="${property.title}" class="popup-image" />` : ''}
+          <div class="popup-title">${property.title}</div>
+          <div class="popup-location">
+            <i class="fas fa-map-marker-alt"></i> ${property.location}
+          </div>
+          <div class="popup-price">₹${formatPrice(property.price)}</div>
+          <div class="popup-details">
+            <div class="popup-detail">
+              <i class="fas fa-ruler-combined"></i> ${Math.round(property.area)} sq ft
+            </div>
+            <div class="popup-detail">
+              <i class="fas fa-tag"></i> ${property.status}
+            </div>
+          </div>
+          <a href="/property/${property.id}" class="popup-btn">
+            <i class="fas fa-eye"></i> View Details
+          </a>
+        </div>
+      `;
+      
+      marker.bindPopup(popupContent);
+      markers.addLayer(marker);
+    }
+  });
+  
+  // Fit map to show all markers
+  if (markers.getBounds().isValid()) {
+    map.fitBounds(markers.getBounds(), { padding: [50, 50] });
+  }
+}
+
+// Apply filters
+function applyFilters() {
+  const type = document.getElementById('filterType').value;
+  const maxPrice = parseFloat(document.getElementById('filterPrice').value) || Infinity;
+  const status = document.getElementById('filterStatus').value;
+  
+  const filtered = allProperties.filter(property => {
+    const matchType = !type || property.property_type === type;
+    const matchPrice = property.price <= maxPrice;
+    const matchStatus = !status || property.status === status;
+    return matchType && matchPrice && matchStatus;
+  });
+  
+  displayProperties(filtered);
+}
+
+// Format price
+function formatPrice(price) {
+  if (price >= 10000000) {
+    return (price / 10000000).toFixed(2) + ' Cr';
+  } else if (price >= 100000) {
+    return (price / 100000).toFixed(2) + ' L';
+  }
+  return price.toLocaleString('en-IN');
+}
+
+// Toggle amenities layer
+function toggleAmenities(show) {
+  if (show) {
+    // Add amenities near each property
+    amenitiesLayer.clearLayers();
+    
+    // Generate amenities around each property location
+    allProperties.forEach(property => {
+      if (property.latitude && property.longitude) {
+        // Generate 3 random amenities near each property (within ~2km radius)
+        const amenityTypes = ['school', 'hospital', 'mall'];
+        
+        amenityTypes.forEach((type, index) => {
+          // Random offset for latitude and longitude (approximately 1-2 km)
+          const latOffset = (Math.random() - 0.5) * 0.02;
+          const lngOffset = (Math.random() - 0.5) * 0.02;
+          
+          const amenity = {
+            type: type,
+            name: getAmenityName(type, index),
+            lat: property.latitude + latOffset,
+            lng: property.longitude + lngOffset
+          };
+          
+          const icon = L.divIcon({
+            html: `<div style="background:${getAmenityColor(amenity.type)};width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><i class="fas fa-${getAmenityIcon(amenity.type)}" style="color:white;font-size:14px;"></i></div>`,
+            className: '',
+            iconSize: [28, 28]
+          });
+          
+          L.marker([amenity.lat, amenity.lng], { icon })
+            .bindPopup(`<b>${amenity.name}</b><br>${amenity.type}`)
+            .addTo(amenitiesLayer);
+        });
+      }
+    });
+    
+    map.addLayer(amenitiesLayer);
+  } else {
+    map.removeLayer(amenitiesLayer);
+  }
+}
+
+function getAmenityName(type, index) {
+  const names = {
+    'school': ['Public School', 'International School', 'High School', 'Primary School'],
+    'hospital': ['City Hospital', 'Medical Center', 'Clinic', 'Health Center'],
+    'mall': ['Shopping Mall', 'Commercial Complex', 'Market Plaza', 'Trade Center']
+  };
+  return names[type][index % names[type].length];
+}
+
+function getAmenityColor(type) {
+  const colors = {
+    'school': '#4CAF50',
+    'hospital': '#f44336',
+    'mall': '#2196F3'
+  };
+  return colors[type] || '#9E9E9E';
+}
+
+function getAmenityIcon(type) {
+  const icons = {
+    'school': 'graduation-cap',
+    'hospital': 'hospital',
+    'mall': 'shopping-bag'
+  };
+  return icons[type] || 'map-pin';
+}
+
+// Toggle drawing tools
+function toggleDrawing(enabled) {
+  if (enabled) {
+    if (!drawControl) {
+      drawControl = new L.Control.Draw({
+        draw: {
+          polygon: {
+            allowIntersection: false,
+            drawError: {
+              color: '#e1e100',
+              message: '<strong>Error:</strong> Shape edges cannot cross!'
+            },
+            shapeOptions: {
+              color: '#667eea',
+              weight: 3
+            }
+          },
+          rectangle: {
+            shapeOptions: {
+              color: '#667eea',
+              weight: 3
+            }
+          },
+          circle: {
+            shapeOptions: {
+              color: '#667eea',
+              weight: 3
+            }
+          },
+          polyline: false,
+          marker: false,
+          circlemarker: false
+        },
+        edit: {
+          featureGroup: drawnItems,
+          remove: true
+        }
+      });
+      
+      map.addControl(drawControl);
+      
+      // Handle drawn shapes
+      map.on(L.Draw.Event.CREATED, function(e) {
+        drawnItems.clearLayers();
+        drawnItems.addLayer(e.layer);
+        filterPropertiesInShape(e.layer);
+      });
+      
+      map.on(L.Draw.Event.DELETED, function() {
+        displayProperties(allProperties);
+      });
+    }
+  } else {
+    if (drawControl) {
+      map.removeControl(drawControl);
+      drawControl = null;
+      drawnItems.clearLayers();
+      displayProperties(allProperties);
+    }
+  }
+}
+
+// Filter properties within drawn shape
+function filterPropertiesInShape(shape) {
+  const filtered = allProperties.filter(property => {
+    if (!property.latitude || !property.longitude) return false;
+    
+    const point = L.latLng(property.latitude, property.longitude);
+    
+    if (shape instanceof L.Circle) {
+      return shape.getLatLng().distanceTo(point) <= shape.getRadius();
+    } else if (shape instanceof L.Rectangle || shape instanceof L.Polygon) {
+      return shape.getBounds().contains(point);
+    }
+    
+    return false;
+  });
+  
+  if (filtered.length > 0) {
+    displayProperties(filtered);
+  } else {
+    alert('No properties found in the selected area.');
+    displayProperties(allProperties);
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+{% endblock %}

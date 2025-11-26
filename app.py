@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 from werkzeug.utils import secure_filename
 import os
+import zipfile
+import io
 from datetime import datetime, timedelta
 from config import Config
 from models import db, Property, PropertyImage, PropertyVideo, PropertyDocument, Enquiry, Admin, User, Favorite, PropertyAlert, Booking, ActivityLog
@@ -518,6 +520,102 @@ def cancel_booking(booking_id):
     
     flash('Booking cancelled successfully.', 'success')
     return redirect(url_for('user_dashboard'))
+
+
+# BULK DOCUMENT DOWNLOAD
+@app.route('/property/<int:property_id>/documents/download-all')
+def download_all_documents(property_id):
+    """Bulk download all documents for a property as ZIP"""
+    property = Property.query.get_or_404(property_id)
+    
+    if not property.documents:
+        flash('No documents available for this property.', 'warning')
+        return redirect(url_for('property_detail', id=property_id))
+    
+    # Create in-memory ZIP file (serverless-safe)
+    memory_file = io.BytesIO()
+    
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for document in property.documents:
+            file_path = os.path.join('static', document.document_url)
+            if os.path.exists(file_path):
+                zf.write(file_path, arcname=document.document_name)
+    
+    memory_file.seek(0)
+    
+    log_activity('download_all_documents', f'Downloaded all documents for property: {property.title}',
+                 'user' if 'user_id' in session else 'guest',
+                 session.get('user_id'))
+    
+    # Generate safe filename
+    safe_title = "".join(c for c in property.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    download_name = f"{safe_title[:50]}_Documents.zip"
+    
+    return send_file(
+        memory_file,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=download_name
+    )
+
+# MAP VIEW ROUTES
+@app.route('/map')
+def map_view():
+    """Interactive map view of all properties"""
+    return render_template('map_view.html')
+
+@app.route('/api/properties')
+def api_properties():
+    """JSON API endpoint for properties (used by map)"""
+    try:
+        # Get filter parameters
+        property_type = request.args.get('type', '')
+        max_price = request.args.get('max_price', type=float)
+        status = request.args.get('status', 'Available')
+        
+        # Build query
+        query = Property.query
+        if status:
+            query = query.filter_by(status=status)
+        if property_type:
+            query = query.filter_by(property_type=property_type)
+        if max_price:
+            query = query.filter(Property.price <= max_price)
+        
+        properties = query.all()
+        
+        # Convert to JSON-friendly format
+        properties_data = []
+        for prop in properties:
+            # Get first image URL if available
+            image_url = ''
+            if prop.images:
+                image_url = prop.images[0].image_url
+            
+            properties_data.append({
+                'id': prop.id,
+                'title': prop.title,
+                'property_type': prop.property_type,
+                'price': prop.price,
+                'area': prop.area,
+                'location': prop.location,
+                'address': prop.address,
+                'latitude': prop.latitude,
+                'longitude': prop.longitude,
+                'status': prop.status,
+                'image_url': image_url
+            })
+        
+        return jsonify(properties_data)
+    except Exception as e:
+        print(f"Error in API properties: {e}")
+        return jsonify([]), 500
+
+# COMPARISON ROUTE
+@app.route('/compare')
+def compare_properties():
+    """Property comparison page"""
+    return render_template('compare.html')
 
 # SOCIAL SHARING ROUTES
 @app.route('/share/<int:property_id>')
@@ -1045,20 +1143,6 @@ def admin_delete_image(id):
     image = PropertyImage.query.get_or_404(id)
     try:
         os.remove(os.path.join('static', image.image_url))
-    except Exception:
-        pass
-    db.session.delete(image)
-    db.session.commit()
-    
-    log_activity('delete_image', 'Deleted property image', 'admin')
-    
-    return jsonify({'success': True})
-
-@app.route('/admin/document/delete/<int:id>', methods=['POST'])
-@admin_login_required
-def admin_delete_document(id):
-    document = PropertyDocument.query.get_or_404(id)
-    try:
         os.remove(os.path.join('static', document.document_url))
     except Exception:
         pass

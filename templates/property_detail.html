@@ -444,7 +444,14 @@
             <!-- Documents -->
             {% if property.documents %}
             <div class="section-block property-documents">
-              <h2><i class="fas fa-file-alt"></i> Property Documents</h2>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h2 style="margin-bottom:0;"><i class="fas fa-file-alt"></i> Property Documents</h2>
+                {% if property.documents|length > 1 %}
+                <a href="{{ url_for('download_all_documents', property_id=property.id) }}" class="btn btn-primary" style="padding:.65rem 1.2rem;font-size:.85rem;display:inline-flex;align-items:center;gap:.5rem;">
+                  <i class="fas fa-file-archive"></i> Download All ({{ property.documents|length }} files)
+                </a>
+                {% endif %}
+              </div>
               <div class="documents-grid">
                 {% for document in property.documents %}
                   <div class="document-card">

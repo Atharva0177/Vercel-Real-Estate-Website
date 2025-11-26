@@ -1,6 +1,232 @@
 {% extends 'base.html' %}
 
-{% block title %}Properties - Premium Real Estate{% endblock %}
+{% block title %}Properties - Premium Real Estate
+<!-- Floating Compare Bar -->
+<div id="compareBar" class="compare-bar">
+    <div class="compare-bar-content">
+        <div class="compare-info">
+            <i class="fas fa-balance-scale"></i>
+            <span id="compareCount">0</span> properties selected
+        </div>
+        <button class="btn btn-primary" onclick="goToCompare()" id="compareBtn" disabled>
+            <i class="fas fa-exchange-alt"></i> Compare Now
+        </button>
+        <button class="btn btn-secondary" onclick="clearCompare()">
+            <i class="fas fa-times"></i> Clear All
+        </button>
+    </div>
+</div>
+
+<style>
+/* Compare Checkbox - BOTTOM LEFT */
+.compare-checkbox {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 10;
+}
+
+.compare-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.compare-checkbox label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.compare-checkbox label i {
+    font-size: 1.1rem;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.compare-checkbox label:hover {
+    background: #667eea;
+    transform: scale(1.1);
+}
+
+.compare-checkbox label:hover i {
+    color: white;
+}
+
+.compare-checkbox input[type="checkbox"]:checked + label {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.compare-checkbox input[type="checkbox"]:checked + label i {
+    color: white;
+}
+
+/* Compare Bar */
+.compare-bar {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+}
+
+.compare-bar.active {
+    bottom: 0;
+}
+
+.compare-bar-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.compare-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.compare-info i {
+    font-size: 1.5rem;
+    color: #667eea;
+}
+
+#compareCount {
+    color: #667eea;
+    font-size: 1.3rem;
+}
+
+.compare-bar .btn {
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .compare-bar-content {
+        flex-direction: column;
+    }
+    
+    .compare-bar .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+let compareList = [];
+const maxCompare = 4;
+
+// Load from sessionStorage on page load
+setTimeout(function() {
+    const stored = sessionStorage.getItem('propertyComparison');
+    if (stored) {
+        compareList = JSON.parse(stored);
+        compareList.forEach(property => {
+            const checkbox = document.getElementById(`compare-${property.id}`);
+            if (checkbox) checkbox.checked = true;
+        });
+        updateCompareBar();
+    }
+}, 100);
+
+function saveToStorage() {
+    sessionStorage.setItem('propertyComparison', JSON.stringify(compareList));
+}
+
+function toggleCompare(checkbox) {
+    const id = parseInt(checkbox.dataset.id);
+    const title = checkbox.dataset.title;
+    const price = parseFloat(checkbox.dataset.price);
+    const image = checkbox.dataset.image;
+    
+    if (checkbox.checked) {
+        if (compareList.length >= maxCompare) {
+            checkbox.checked = false;
+            alert(`You can only compare up to ${maxCompare} properties at once.`);
+            return;
+        }
+        
+        // Fetch full property data from API
+        fetch(`/api/property/${id}`)
+            .then(response => response.json())
+            .then(property => {
+                compareList.push(property);
+                updateCompareBar();
+                saveToStorage();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to basic data
+                compareList.push({ 
+                    id, title, price, 
+                    image_url: image,
+                    location: 'N/A',
+                    area: 1000,
+                    property_type: 'N/A',
+                    status: 'Available'
+                });
+                updateCompareBar();
+                saveToStorage();
+            });
+    } else {
+        compareList = compareList.filter(item => item.id !== id);
+        updateCompareBar();
+        saveToStorage();
+    }
+}
+
+function updateCompareBar() {
+    const compareBar = document.getElementById('compareBar');
+    const compareCount = document.getElementById('compareCount');
+    const compareBtn = document.getElementById('compareBtn');
+    
+    compareCount.textContent = compareList.length;
+    
+    if (compareList.length > 0) {
+        compareBar.classList.add('active');
+        compareBtn.disabled = compareList.length < 2;
+    } else {
+        compareBar.classList.remove('active');
+        compareBtn.disabled = true;
+    }
+}
+
+function goToCompare() {
+    if (compareList.length < 2) {
+        alert('Please select at least 2 properties to compare.');
+        return;
+    }
+    saveToStorage();
+    window.location.href = '/compare';
+}
+
+function clearCompare() {
+    compareList = [];
+    document.querySelectorAll('.compare-check').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    sessionStorage.removeItem('propertyComparison');
+    updateCompareBar();
+}
+</script>
+
+
+{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -93,6 +319,12 @@
         <div class="properties-grid">
             {% for property in properties.items %}
             <div class="property-card fade-in-up">
+                <div class="compare-checkbox">
+                    <input type="checkbox" id="compare-{{ property.id }}" class="compare-check" data-id="{{ property.id }}" data-title="{{ property.title }}" data-price="{{ property.price }}" data-image="{% if property.images %}{{ property.images[0].image_url }}{% else %}https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800{% endif %}" onchange="toggleCompare(this)">
+                    <label for="compare-{{ property.id }}" title="Add to compare">
+                        <i class="fas fa-balance-scale"></i>
+                    </label>
+                </div>
                 <a href="{{ url_for('property_detail', id=property.id) }}" class="property-card-link">
                     <div class="property-image">
                         {% if property.images %}
@@ -178,4 +410,230 @@
         {% endif %}
     </div>
 </section>
+
+<!-- Floating Compare Bar -->
+<div id="compareBar" class="compare-bar">
+    <div class="compare-bar-content">
+        <div class="compare-info">
+            <i class="fas fa-balance-scale"></i>
+            <span id="compareCount">0</span> properties selected
+        </div>
+        <button class="btn btn-primary" onclick="goToCompare()" id="compareBtn" disabled>
+            <i class="fas fa-exchange-alt"></i> Compare Now
+        </button>
+        <button class="btn btn-secondary" onclick="clearCompare()">
+            <i class="fas fa-times"></i> Clear All
+        </button>
+    </div>
+</div>
+
+<style>
+/* Compare Checkbox - BOTTOM LEFT */
+.compare-checkbox {
+    position: absolute;
+    top: 3.5rem;
+    right: 1rem;
+    z-index: 10;
+}
+
+.compare-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.compare-checkbox label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.compare-checkbox label i {
+    font-size: 1.1rem;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.compare-checkbox label:hover {
+    background: #667eea;
+    transform: scale(1.1);
+}
+
+.compare-checkbox label:hover i {
+    color: white;
+}
+
+.compare-checkbox input[type="checkbox"]:checked + label {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.compare-checkbox input[type="checkbox"]:checked + label i {
+    color: white;
+}
+
+/* Compare Bar */
+.compare-bar {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+}
+
+.compare-bar.active {
+    bottom: 0;
+}
+
+.compare-bar-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.compare-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.compare-info i {
+    font-size: 1.5rem;
+    color: #667eea;
+}
+
+#compareCount {
+    color: #667eea;
+    font-size: 1.3rem;
+}
+
+.compare-bar .btn {
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .compare-bar-content {
+        flex-direction: column;
+    }
+    
+    .compare-bar .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+let compareList = [];
+const maxCompare = 4;
+
+// Load from sessionStorage on page load
+setTimeout(function() {
+    const stored = sessionStorage.getItem('propertyComparison');
+    if (stored) {
+        compareList = JSON.parse(stored);
+        compareList.forEach(property => {
+            const checkbox = document.getElementById(`compare-${property.id}`);
+            if (checkbox) checkbox.checked = true;
+        });
+        updateCompareBar();
+    }
+}, 100);
+
+function saveToStorage() {
+    sessionStorage.setItem('propertyComparison', JSON.stringify(compareList));
+}
+
+function toggleCompare(checkbox) {
+    const id = parseInt(checkbox.dataset.id);
+    const title = checkbox.dataset.title;
+    const price = parseFloat(checkbox.dataset.price);
+    const image = checkbox.dataset.image;
+    
+    if (checkbox.checked) {
+        if (compareList.length >= maxCompare) {
+            checkbox.checked = false;
+            alert(`You can only compare up to ${maxCompare} properties at once.`);
+            return;
+        }
+        
+        // Fetch full property data from API
+        fetch(`/api/property/${id}`)
+            .then(response => response.json())
+            .then(property => {
+                compareList.push(property);
+                updateCompareBar();
+                saveToStorage();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to basic data
+                compareList.push({ 
+                    id, title, price, 
+                    image_url: image,
+                    location: 'N/A',
+                    area: 1000,
+                    property_type: 'N/A',
+                    status: 'Available'
+                });
+                updateCompareBar();
+                saveToStorage();
+            });
+    } else {
+        compareList = compareList.filter(item => item.id !== id);
+        updateCompareBar();
+        saveToStorage();
+    }
+}
+
+function updateCompareBar() {
+    const compareBar = document.getElementById('compareBar');
+    const compareCount = document.getElementById('compareCount');
+    const compareBtn = document.getElementById('compareBtn');
+    
+    compareCount.textContent = compareList.length;
+    
+    if (compareList.length > 0) {
+        compareBar.classList.add('active');
+        compareBtn.disabled = compareList.length < 2;
+    } else {
+        compareBar.classList.remove('active');
+        compareBtn.disabled = true;
+    }
+}
+
+function goToCompare() {
+    if (compareList.length < 2) {
+        alert('Please select at least 2 properties to compare.');
+        return;
+    }
+    saveToStorage();
+    window.location.href = '/compare';
+}
+
+function clearCompare() {
+    compareList = [];
+    document.querySelectorAll('.compare-check').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    sessionStorage.removeItem('propertyComparison');
+    updateCompareBar();
+}
+</script>
+
+
 {% endblock %}

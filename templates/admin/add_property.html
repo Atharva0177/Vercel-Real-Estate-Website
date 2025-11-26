@@ -140,6 +140,16 @@
                         </div>
                     </div>
                     
+                    <div class="form-section">
+                        <h3>Documents</h3>
+                        
+                        <div class="form-group">
+                            <label>{{ form.documents.label }}</label>
+                            {{ form.documents(class="form-control") }}
+                            <p class="help-text">Upload property documents (PDF, DOC, DOCX). These will be available for download on the property page.</p>
+                        </div>
+                    </div>
+                    
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-save"></i> Add Property
