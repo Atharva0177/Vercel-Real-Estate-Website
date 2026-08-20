@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#0F172A">
     <meta name="description" content="Premium Real Estate - Find your perfect property. Browse luxury land plots, residential, commercial, and agricultural properties.">
     <meta name="keywords" content="real estate, property, land plots, residential, commercial, agricultural land, premium estate">
     <meta name="author" content="Atharva0177">
@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -91,7 +91,8 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Navigation (hidden on admin pages) -->
+    {% if not hide_chrome %}
     <nav class="navbar" id="navbar">
         <div class="container">
             <div class="nav-wrapper">
@@ -153,6 +154,7 @@
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -182,11 +184,12 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main>
+    <main style="display: contents;">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Footer (hidden on admin pages) -->
+    {% if not hide_chrome %}
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -216,13 +219,7 @@
                         <li><a href="{{ url_for('user_register') }}">Register</a></li>
                         {% endif %}
                     </ul>
-                    {% if not session.user_id and not session.admin_logged_in %}
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <a href="{{ url_for('admin_login') }}" style="color: rgba(255,255,255,0.6); font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease;">
-                            <i class="fas fa-shield-alt"></i> Admin Access
-                        </a>
-                    </div>
-                    {% endif %}
+
                 </div>
                 
                 <div class="footer-section">
@@ -263,11 +260,14 @@
             </div>
         </div>
     </footer>
+    {% endif %}
 
-    <!-- Scroll to Top Button -->
+    <!-- Scroll to Top Button (hidden on admin pages) -->
+    {% if not hide_chrome %}
     <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
         <i class="fas fa-arrow-up"></i>
     </button>
+    {% endif %}
 
     <!-- Main JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

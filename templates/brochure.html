@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ property.title }} - PDF Brochure | Premium Estate</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <!-- html2pdf.js for 1-click PDF download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #0F172A;
+            --accent: #2563EB;
+            --gold: #B8860B;
+            --gray-dark: #475569;
+            --gray-light: #F8FAFC;
+            --border: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary);
+            background: #FAFAF9;
+            padding: 2rem 1rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Fixed Toolbar */
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .toolbar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.25);
+        }
+
+        .btn-primary:hover {
+            background: #1D4ED8;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--primary);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-light);
+        }
+
+        /* Printable Brochure Area */
+        .brochure-paper {
+            max-width: 850px;
+            margin: 4.5rem auto 2rem;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            padding: 3rem;
+            position: relative;
+        }
+
+        /* Header */
+        .brochure-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .brand-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-logo i {
+            color: var(--accent);
+        }
+
+        .brand-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-dark);
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .brochure-meta-top {
+            text-align: right;
+        }
+
+        .brochure-date {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+
+        .brochure-id {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 0.2rem;
+        }
+
+        /* Property Hero Cover */
+        .brochure-cover {
+            height: 380px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .brochure-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: #ffffff;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Info Section */
+        .property-title-section {
+            margin-bottom: 2rem;
+        }
+
+        .property-type-tag {
+            display: inline-block;
+            background: #EFF6FF;
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.15;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-location {
+            font-size: 1rem;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .property-location i {
+            color: var(--accent);
+        }
+
+        /* Key Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--gray-light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .metric-icon {
+            font-size: 1.25rem;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: var(--gray-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.2rem;
+        }
+
+        /* Description */
+        .brochure-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.4rem;
+        }
+
+        .section-title i {
+            color: var(--accent);
+        }
+
+        .description-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--gray-dark);
+        }
+
+        /* Specs Table */
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        .specs-table th, .specs-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .specs-table th {
+            background: var(--gray-light);
+            color: var(--primary);
+            font-weight: 600;
+            width: 35%;
+        }
+
+        .specs-table td {
+            color: var(--gray-dark);
+        }
+
+        /* Image Gallery Grid */
+        .brochure-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .brochure-gallery-item {
+            height: 140px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .brochure-gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Contact Footer Box */
+        .contact-box {
+            background: var(--primary);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-top: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-left h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.4rem;
+            color: #ffffff;
+        }
+
+        .contact-left p {
+            font-size: 0.875rem;
+            color: #94A3B8;
+        }
+
+        .contact-details {
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .contact-details div {
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            color: #E2E8F0;
+        }
+
+        .contact-details i {
+            color: #60A5FA;
+        }
+
+        /* Printable Footer */
+        .brochure-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gray-dark);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        /* Print CSS Override */
+        @media print {
+            .toolbar {
+                display: none !important;
+            }
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+            .brochure-paper {
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 1.5cm !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Action Bar -->
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <i class="fas fa-file-pdf" style="color: #2563EB;"></i>
+            Property PDF Brochure Preview
+        </div>
+        <div class="toolbar-actions">
+            <a href="{{ url_for('property_detail', id=property.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Property
+            </a>
+            <button onclick="window.print()" class="btn btn-secondary">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button onclick="downloadPDF()" id="downloadBtn" class="btn btn-primary">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Paper Area -->
+    <div class="brochure-paper" id="brochureContent">
+        
+        <!-- Header -->
+        <div class="brochure-header">
+            <div>
+                <div class="brand-logo">
+                    <i class="fas fa-building"></i>
+                    Premium<span>Estate</span>
+                </div>
+                <div class="brand-badge">Luxury Real Estate & Land Properties</div>
+            </div>
+            <div class="brochure-meta-top">
+                <div class="brochure-date">Generated on: {{ now.strftime('%d %B %Y') }}</div>
+                <div class="brochure-id">REF #PROP-{{ "%04d"|format(property.id) }}</div>
+            </div>
+        </div>
+
+        <!-- Cover Photo -->
+        <div class="brochure-cover">
+            {% if property.images %}
+                <img src="{{ property.images[0].image_url }}" alt="{{ property.title }}">
+            {% else %}
+                <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200" alt="{{ property.title }}">
+            {% endif %}
+            <span class="property-status-badge">{{ property.status }}</span>
+        </div>
+
+        <!-- Title & Location -->
+        <div class="property-title-section">
+            <span class="property-type-tag">{{ property.property_type }}</span>
+            <h1 class="property-title">{{ property.title }}</h1>
+            <div class="property-location">
+                <i class="fas fa-map-marker-alt"></i> {{ property.location }}, {{ property.address }}
+            </div>
+        </div>
+
+        <!-- Key Specs Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fas fa-tag"></i></div>
+                <div class="metric-value">₹{{ "{:,.0f}".format(property.price) }}</div>
+                <div class="metric-label">Total Price</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fas fa-ruler-combined"></i></div>
+                <div class="metric-value">{{ property.area|int }}</div>
+                <div class="metric-label">Area (Sq Ft)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fas fa-calculator"></i></div>
+                <div class="metric-value">₹{{ "{:,.0f}".format(property.price / property.area) }}</div>
+                <div class="metric-label">Price / Sq Ft</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="metric-value">{{ property.status }}</div>
+                <div class="metric-label">Availability</div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="brochure-section">
+            <div class="section-title">
+                <i class="fas fa-align-left"></i> Description & Overview
+            </div>
+            <div class="description-text">
+                {{ property.description }}
+            </div>
+        </div>
+
+        <!-- Details Table -->
+        <div class="brochure-section">
+            <div class="section-title">
+                <i class="fas fa-list-check"></i> Property Specifications
+            </div>
+            <table class="specs-table">
+                <tr>
+                    <th>Property Type</th>
+                    <td>{{ property.property_type }}</td>
+                </tr>
+                <tr>
+                    <th>Location</th>
+                    <td>{{ property.location }}</td>
+                </tr>
+                <tr>
+                    <th>Full Address</th>
+                    <td>{{ property.address }}</td>
+                </tr>
+                <tr>
+                    <th>Total Area</th>
+                    <td>{{ property.area|int }} Sq Ft</td>
+                </tr>
+                <tr>
+                    <th>Price</th>
+                    <td>₹{{ "{:,.0f}".format(property.price) }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ property.status }}</td>
+                </tr>
+                <tr>
+                    <th>Listing Date</th>
+                    <td>{{ property.created_at.strftime('%d %B %Y') }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Additional Photo Gallery -->
+        {% if property.images and property.images|length > 1 %}
+        <div class="brochure-section">
+            <div class="section-title">
+                <i class="fas fa-images"></i> Photo Gallery
+            </div>
+            <div class="brochure-gallery-grid">
+                {% for image in property.images[1:4] %}
+                    <div class="brochure-gallery-item">
+                        <img src="{{ image.image_url }}" alt="Gallery Image {{ loop.index }}">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Agent & Contact Info -->
+        <div class="contact-box">
+            <div class="contact-left">
+                <h3>Interested in this property?</h3>
+                <p>Contact our dedicated real estate sales team for site visits & negotiations.</p>
+            </div>
+            <div class="contact-details">
+                <div><i class="fas fa-phone"></i> +91 98765 43210</div>
+                <div><i class="fas fa-envelope"></i> info@premiumestate.com</div>
+                <div><i class="fas fa-globe"></i> www.premiumestate.com</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="brochure-footer">
+            © {{ now.year }} PremiumEstate. All rights reserved. Confidential brochure generated for official inquiries.
+        </div>
+
+    </div>
+
+    <!-- PDF Generation Script -->
+    <script>
+        function downloadPDF() {
+            const element = document.getElementById('brochureContent');
+            const btn = document.getElementById('downloadBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            btn.disabled = true;
+
+            const filename = 'Brochure-{{ property.title|slugify or property.id }}.pdf';
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+                    btn.disabled = false;
+                }, 3000);
+            }).catch(err => {
+                console.error('PDF generation error:', err);
+                btn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+                btn.disabled = false;
+                alert('Downloading PDF... (If pop-up blocked, please use the Print option)');
+            });
+        }
+
+        // Auto-download if ?download=true URL parameter is present
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('download') === 'true') {
+                setTimeout(downloadPDF, 800);
+            }
+        });
+    </script>
+
+</body>
+</html>

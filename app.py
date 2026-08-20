@@ -15,6 +15,9 @@ try:
 except ImportError:
     vercel_blob = None  # Will use local storage if not available
 
+from slugify import slugify
+
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -22,6 +25,11 @@ app.config.from_object(Config)
 db.init_app(app)
 mail = Mail(app)
 
+
+
+@app.template_filter("slugify")
+def slugify_filter(text):
+    return slugify(text)
 
 # Make datetime and other utilities available to all templates
 @app.context_processor
@@ -36,6 +44,12 @@ def inject_globals():
 @app.context_processor
 def inject_config():
     return {'config': app.config}
+
+# Hide website navbar/footer on all admin routes
+@app.context_processor
+def inject_admin_flag():
+    from flask import request as _req
+    return {'hide_chrome': _req.endpoint and _req.endpoint.startswith('admin')}
 
 # Create upload directories (Vercel read-only filesystem safe)
 try:
@@ -205,6 +219,12 @@ def property_detail(id):
     except Exception as e:
         print(f"Error in property_detail route: {e}")
         return f"Error: {e}", 500
+
+# PROPERTY BROCHURE & PDF
+@app.route('/property/<int:id>/brochure')
+def property_brochure(id):
+    property = Property.query.get_or_404(id)
+    return render_template('brochure.html', property=property)
 
 # ENQUIRIES
 @app.route('/enquiry', methods=['POST'])
@@ -1143,6 +1163,20 @@ def admin_delete_image(id):
     image = PropertyImage.query.get_or_404(id)
     try:
         os.remove(os.path.join('static', image.image_url))
+    except Exception:
+        pass
+    db.session.delete(image)
+    db.session.commit()
+    
+    log_activity('delete_image', 'Deleted property image', 'admin')
+    
+    return jsonify({'success': True})
+
+@app.route('/admin/document/delete/<int:id>', methods=['POST'])
+@admin_login_required
+def admin_delete_document(id):
+    document = PropertyDocument.query.get_or_404(id)
+    try:
         os.remove(os.path.join('static', document.document_url))
     except Exception:
         pass

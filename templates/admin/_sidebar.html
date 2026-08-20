@@ -1,0 +1,77 @@
+<!-- Mobile Sidebar Toggle -->
+<button class="admin-mobile-toggle" id="adminSidebarToggle" aria-label="Toggle Navigation">
+  <i class="fas fa-bars"></i>
+</button>
+
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <i class="fas fa-shield-alt"></i>
+      <span>Admin Portal</span>
+    </div>
+    <span class="live-pill"><i class="fas fa-circle"></i> Live</span>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">MAIN NAVIGATION</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item {% if active_page == 'dashboard' or request.endpoint == 'admin_dashboard' %}active{% endif %}">
+      <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin_properties') }}" class="nav-item {% if active_page == 'properties' or request.endpoint == 'admin_properties' %}active{% endif %}">
+      <i class="fas fa-building"></i> <span>Properties</span>
+    </a>
+    <a href="{{ url_for('admin_add_property') }}" class="nav-item {% if active_page == 'add_property' or request.endpoint == 'admin_add_property' %}active{% endif %}">
+      <i class="fas fa-plus-circle"></i> <span>Add Property</span>
+    </a>
+    <a href="{{ url_for('admin_enquiries') }}" class="nav-item {% if active_page == 'enquiries' or request.endpoint == 'admin_enquiries' %}active{% endif %}">
+      <i class="fas fa-paper-plane"></i> <span>Enquiries</span>
+    </a>
+    <a href="{{ url_for('admin_bookings') }}" class="nav-item {% if active_page == 'bookings' or request.endpoint == 'admin_bookings' %}active{% endif %}">
+      <i class="fas fa-calendar-alt"></i> <span>Site Visits</span>
+    </a>
+    <a href="{{ url_for('admin_users') }}" class="nav-item {% if active_page == 'users' or request.endpoint == 'admin_users' %}active{% endif %}">
+      <i class="fas fa-users"></i> <span>Users</span>
+    </a>
+    <a href="{{ url_for('admin_analytics') }}" class="nav-item {% if active_page == 'analytics' or request.endpoint == 'admin_analytics' %}active{% endif %}">
+      <i class="fas fa-chart-line"></i> <span>Analytics</span>
+    </a>
+    
+    <div class="nav-section-title">QUICK LINKS</div>
+    <a href="{{ url_for('index') }}" class="nav-item" target="_blank">
+      <i class="fas fa-external-link-alt"></i> <span>View Live Site</span>
+    </a>
+    <a href="{{ url_for('admin_logout') }}" class="nav-item nav-logout">
+      <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar">
+      <i class="fas fa-user-shield"></i>
+    </div>
+    <div class="user-info">
+      <span class="user-name">{{ session.admin_username or 'Administrator' }}</span>
+      <span class="user-role">Super Admin</span>
+    </div>
+  </div>
+</aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleBtn = document.getElementById('adminSidebarToggle');
+  const sidebar = document.getElementById('adminSidebar');
+  
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== toggleBtn) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+});
+</script>

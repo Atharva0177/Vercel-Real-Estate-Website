@@ -8,41 +8,8 @@
 
 {% block content %}
 <div class="admin-layout">
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-user-shield"></i>
-            <span>Admin Panel</span>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="{{ url_for('admin_properties') }}" class="nav-item">
-                <i class="fas fa-building"></i> Properties
-            </a>
-            <a href="{{ url_for('admin_add_property') }}" class="nav-item">
-                <i class="fas fa-plus-circle"></i> Add Property
-            </a>
-            <a href="{{ url_for('admin_enquiries') }}" class="nav-item">
-                <i class="fas fa-envelope"></i> Enquiries
-            </a>
-            <a href="{{ url_for('admin_bookings') }}" class="nav-item">
-                <i class="fas fa-calendar-check"></i> Bookings
-            </a>
-            <a href="{{ url_for('admin_users') }}" class="nav-item">
-                <i class="fas fa-users"></i> Users
-            </a>
-            <a href="{{ url_for('admin_analytics') }}" class="nav-item active">
-                <i class="fas fa-chart-bar"></i> Analytics
-            </a>
-            <a href="{{ url_for('index') }}" class="nav-item">
-                <i class="fas fa-globe"></i> View Website
-            </a>
-            <a href="{{ url_for('admin_logout') }}" class="nav-item">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </nav>
-    </aside>
+    {% set active_page = 'analytics' %}
+    {% include 'admin/_sidebar.html' %}
     
     <main class="admin-main">
         <div class="admin-header">
@@ -52,71 +19,74 @@
         <div class="admin-content">
             <!-- Overview Stats -->
             <div class="stats-grid" style="margin-bottom: 3rem;">
-                <div class="stat-card blue">
-                    <div class="stat-icon">
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon-wrapper">
                         <i class="fas fa-building"></i>
                     </div>
-                    <div class="stat-details">
-                        <h3>{{ total_properties }}</h3>
-                        <p>Total Properties</p>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Properties</span>
+                        <div class="stat-number">{{ total_properties }}</div>
                     </div>
                 </div>
                 
-                <div class="stat-card green">
-                    <div class="stat-icon">
+                <div class="stat-card stat-emerald">
+                    <div class="stat-icon-wrapper">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-details">
-                        <h3>{{ total_users }}</h3>
-                        <p>Registered Users</p>
+                    <div class="stat-info">
+                        <span class="stat-label">Registered Users</span>
+                        <div class="stat-number">{{ total_users }}</div>
                     </div>
                 </div>
                 
-                <div class="stat-card orange">
-                    <div class="stat-icon">
+                <div class="stat-card stat-amber">
+                    <div class="stat-icon-wrapper">
                         <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="stat-details">
-                        <h3>{{ total_bookings }}</h3>
-                        <p>Total Bookings</p>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Bookings</span>
+                        <div class="stat-number">{{ total_bookings }}</div>
                     </div>
                 </div>
                 
-                <div class="stat-card purple">
-                    <div class="stat-icon">
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon-wrapper">
                         <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="stat-details">
-                        <h3>{{ total_enquiries }}</h3>
-                        <p>Total Enquiries</p>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Enquiries</span>
+                        <div class="stat-number">{{ total_enquiries }}</div>
                     </div>
                 </div>
             </div>
 
             <!-- Property Type Distribution -->
             <div class="dashboard-section" style="margin-bottom: 2rem;">
-                <h2><i class="fas fa-chart-pie"></i> Property Type Distribution</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <h2 style="margin-bottom: 1.25rem; font-size: 1.2rem; font-weight: 700; color: var(--admin-text); display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fas fa-chart-pie" style="color: var(--accent-blue);"></i> Property Type Distribution
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-top: 1rem;">
                     {% for prop_type, count in property_types %}
-                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 15px; text-align: center;">
-                        <h3 style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ count }}</h3>
-                        <p style="opacity: 0.9;">{{ prop_type }}</p>
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 1.75rem; text-align: center; border-top: 4px solid var(--accent-blue);">
+                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent-blue); margin-bottom: 0.4rem;">{{ count }}</div>
+                        <div style="font-size: 0.88rem; font-weight: 600; color: var(--admin-text-muted);">{{ prop_type }}</div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Monthly Properties -->
             <div class="dashboard-section" style="margin-bottom: 2rem;">
-                <h2><i class="fas fa-chart-line"></i> Property Additions (Last 6 Months)</h2>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; align-items: flex-end; height: 300px;">
+                <h2 style="margin-bottom: 1.25rem; font-size: 1.2rem; font-weight: 700; color: var(--admin-text); display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fas fa-chart-line" style="color: var(--accent-blue);"></i> Property Additions (Last 6 Months)
+                </h2>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; align-items: flex-end; height: 260px;">
                     {% for month, count in monthly_properties %}
                     <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                        <div style="background: linear-gradient(to top, #667eea, #764ba2); width: 100%; border-radius: 10px 10px 0 0; display: flex; align-items: flex-end; justify-content: center; padding: 1rem; color: white; font-weight: 700; font-size: 1.2rem;" 
+                        <div style="background: linear-gradient(to top, #2563EB, #60A5FA); width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: flex-end; justify-content: center; padding: 0.75rem 0.5rem; color: white; font-weight: 700; font-size: 1.1rem;"
                              data-height="{{ (count / monthly_properties|map(attribute=1)|max * 100) if monthly_properties|map(attribute=1)|max > 0 else 0 }}%">
                             {{ count }}
                         </div>
-                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--dark-gray);">{{ month }}</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--admin-text-muted); font-weight: 500;">{{ month }}</div>
                     </div>
                     {% endfor %}
                 </div>

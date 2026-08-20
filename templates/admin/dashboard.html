@@ -3,135 +3,371 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
+
 {% block content %}
 <div class="admin-layout">
-  <aside class="admin-sidebar">
-    <div class="sidebar-header"><i class="fas fa-user-shield"></i><span>Admin Panel</span></div>
-    <nav class="sidebar-nav">
-      <a href="{{ url_for('admin_dashboard') }}" class="nav-item active"><i class="fas fa-chart-line"></i> Dashboard</a>
-      <a href="{{ url_for('admin_properties') }}" class="nav-item"><i class="fas fa-building"></i> Properties</a>
-      <a href="{{ url_for('admin_add_property') }}" class="nav-item"><i class="fas fa-plus-circle"></i> Add Property</a>
-      <a href="{{ url_for('admin_enquiries') }}" class="nav-item"><i class="fas fa-envelope"></i> Enquiries</a>
-      <a href="{{ url_for('admin_bookings') }}" class="nav-item"><i class="fas fa-calendar-check"></i> Bookings</a>
-      <a href="{{ url_for('index') }}" class="nav-item"><i class="fas fa-globe"></i> View Website</a>
-      <a href="{{ url_for('admin_logout') }}" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </nav>
-  </aside>
+  {% include 'admin/_sidebar.html' %}
 
   <main class="admin-main">
-    <div class="admin-header">
-      <h1>Dashboard</h1>
-      <div class="admin-user"><i class="fas fa-user-circle"></i><span>{{ session.admin_username }}</span></div>
+    <!-- Welcome Header Banner -->
+    <div class="admin-welcome-card">
+      <div class="welcome-text">
+        <span class="welcome-greeting"><i class="fas fa-sparkles"></i> Welcome Back</span>
+        <h1>Executive Dashboard</h1>
+        <p>Real-time performance metrics, property management, and visitor enquiries overview.</p>
+      </div>
+      <div class="welcome-actions">
+        <a href="{{ url_for('admin_add_property') }}" class="btn-action primary">
+          <i class="fas fa-plus"></i> Add Property
+        </a>
+        <a href="{{ url_for('admin_analytics') }}" class="btn-action secondary">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+        <a href="{{ url_for('admin_test_email') }}" class="btn-action outline" title="Send a test email notification">
+          <i class="fas fa-envelope"></i> Test Email
+        </a>
+        <a href="{{ url_for('admin_seed_database') }}" class="btn-action outline" onclick="return confirm('Seed demo data into database?');">
+          <i class="fas fa-database"></i> Seed Data
+        </a>
+      </div>
     </div>
 
     <div class="admin-content">
+      <!-- Key Statistics Grid -->
       <div class="stats-grid">
-        <div class="stat-card blue"><div class="stat-icon"><i class="fas fa-building"></i></div><div class="stat-details"><h3>{{ stats.total }}</h3><p>Total Properties</p></div></div>
-        <div class="stat-card green"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-details"><h3>{{ stats.available }}</h3><p>Available</p></div></div>
-        <div class="stat-card orange"><div class="stat-icon"><i class="fas fa-handshake"></i></div><div class="stat-details"><h3>{{ stats.sold }}</h3><p>Sold</p></div></div>
-        <div class="stat-card purple"><div class="stat-icon"><i class="fas fa-envelope"></i></div><div class="stat-details"><h3>{{ stats.enquiries }}</h3><p>New Enquiries</p></div></div>
-        <div class="stat-card teal"><div class="stat-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-details"><h3>{{ stats.bookings }}</h3><p>Pending Visits</p></div></div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon-wrapper">
+            <i class="fas fa-city"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Properties</span>
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-sub">
+              <span class="sub-pill green"><i class="fas fa-check-circle"></i> {{ stats.available }} Available</span>
+              <span class="sub-pill red"><i class="fas fa-tag"></i> {{ stats.sold }} Sold</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-emerald">
+          <div class="stat-icon-wrapper">
+            <i class="fas fa-eye"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Property Reach</span>
+            <div class="stat-number">{{ "{:,.0f}".format(stats.views or 0) }}</div>
+            <div class="stat-sub">
+              <span class="sub-pill teal"><i class="fas fa-share-alt"></i> {{ stats.shares or 0 }} Shares</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-purple">
+          <div class="stat-icon-wrapper">
+            <i class="fas fa-users-cog"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Registered Users</span>
+            <div class="stat-number">{{ stats.users }}</div>
+            <div class="stat-sub">
+              <span class="sub-pill purple"><i class="fas fa-user-check"></i> Verified Accounts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-amber">
+          <div class="stat-icon-wrapper">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">New Enquiries</span>
+            <div class="stat-number">{{ stats.enquiries }}</div>
+            <div class="stat-sub">
+              <span class="sub-pill amber"><i class="fas fa-clock"></i> Requires Response</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-rose">
+          <div class="stat-icon-wrapper">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Pending Visits</span>
+            <div class="stat-number">{{ stats.bookings }}</div>
+            <div class="stat-sub">
+              <span class="sub-pill rose"><i class="fas fa-exclamation-circle"></i> Site Visits</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="dashboard-section">
-        <div class="section-header">
-          <h2>Recent Properties</h2>
-          <a href="{{ url_for('admin_properties') }}" class="btn btn-secondary">View All</a>
-        </div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Type</th><th>Location</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-            <tbody>
-              {% if properties and properties|length > 0 %}
-                {% for property in properties %}
-                <tr>
-                  <td>{{ property.title }}</td>
-                  <td>{{ property.property_type }}</td>
-                  <td>{{ property.location }}</td>
-                  <td>{{ property.status }}</td>
-                  <td>{{ property.created_at.strftime('%d %b %Y') }}</td>
-                  <td>
-                    <div class="action-buttons">
-                      <a href="{{ url_for('property_detail', id=property.id) }}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
-                      <a href="{{ url_for('admin_edit_property', id=property.id) }}" class="btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              {% else %}
-                <tr><td colspan="6" style="text-align:center;color:#777;">No recent properties.</td></tr>
-              {% endif %}
-            </tbody>
-          </table>
-        </div>
+      <!-- Quick Action Cards Grid -->
+      <div class="quick-shortcuts">
+        <a href="{{ url_for('admin_add_property') }}" class="shortcut-card">
+          <div class="shortcut-icon"><i class="fas fa-building-circle-check"></i></div>
+          <div class="shortcut-details">
+            <h4>Add New Listing</h4>
+            <p>Publish plot photos, location data & PDF documents</p>
+          </div>
+          <i class="fas fa-chevron-right shortcut-arrow"></i>
+        </a>
+
+        <a href="{{ url_for('admin_enquiries') }}" class="shortcut-card">
+          <div class="shortcut-icon icon-amber"><i class="fas fa-inbox"></i></div>
+          <div class="shortcut-details">
+            <h4>Manage Enquiries</h4>
+            <p>Review customer questions and update enquiry status</p>
+          </div>
+          <i class="fas fa-chevron-right shortcut-arrow"></i>
+        </a>
+
+        <a href="{{ url_for('admin_bookings') }}" class="shortcut-card">
+          <div class="shortcut-icon icon-rose"><i class="fas fa-calendar-day"></i></div>
+          <div class="shortcut-details">
+            <h4>Site Visit Bookings</h4>
+            <p>Confirm scheduled buyer site visit appointments</p>
+          </div>
+          <i class="fas fa-chevron-right shortcut-arrow"></i>
+        </a>
+
+        <a href="{{ url_for('admin_analytics') }}" class="shortcut-card">
+          <div class="shortcut-icon icon-purple"><i class="fas fa-chart-network"></i></div>
+          <div class="shortcut-details">
+            <h4>Analytics & Growth</h4>
+            <p>Analyze property views, shares & user engagement</p>
+          </div>
+          <i class="fas fa-chevron-right shortcut-arrow"></i>
+        </a>
       </div>
 
-      <div class="dashboard-section">
-        <div class="section-header">
-          <h2>Recent Enquiries</h2>
-          <a href="{{ url_for('admin_enquiries') }}" class="btn btn-secondary">View All</a>
+      <!-- Main Dashboard Grid Layout -->
+      <div class="dashboard-grid">
+        <!-- Left Main Panel -->
+        <div class="grid-column main-col">
+          <!-- Recent Properties Section -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-building"></i>
+                <h3>Recent Properties</h3>
+              </div>
+              <a href="{{ url_for('admin_properties') }}" class="btn-link">View All Listings <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Property Title</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Date Added</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if properties and properties|length > 0 %}
+                    {% for property in properties %}
+                    <tr>
+                      <td class="font-medium">
+                        <a href="{{ url_for('property_detail', id=property.id) }}" target="_blank" class="table-title-link">
+                          {{ property.title }}
+                        </a>
+                      </td>
+                      <td><span class="type-tag">{{ property.property_type }}</span></td>
+                      <td><i class="fas fa-map-marker-alt text-muted"></i> {{ property.location }}</td>
+                      <td>
+                        <span class="status-badge status-{{ property.status.lower() }}">
+                          <span class="status-dot"></span> {{ property.status }}
+                        </span>
+                      </td>
+                      <td class="text-muted">{{ property.created_at.strftime('%d %b %Y') }}</td>
+                      <td class="text-right">
+                        <div class="action-buttons">
+                          <a href="{{ url_for('property_detail', id=property.id) }}" class="btn-icon view" title="Preview" target="_blank">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <a href="{{ url_for('admin_edit_property', id=property.id) }}" class="btn-icon edit" title="Edit Property">
+                            <i class="fas fa-pen"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="empty-state">
+                        <i class="fas fa-building"></i>
+                        <p>No properties added yet. Click "Add Property" to get started.</p>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Bookings Section -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Recent Site Visit Bookings</h3>
+              </div>
+              <a href="{{ url_for('admin_bookings') }}" class="btn-link">View All Bookings <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Visitor</th>
+                    <th>Property</th>
+                    <th>Visit Date</th>
+                    <th>Time Slot</th>
+                    <th>Status</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if bookings and bookings|length > 0 %}
+                    {% for booking in bookings %}
+                    <tr>
+                      <td class="font-medium">
+                        <div>{{ booking.visitor_name }}</div>
+                        <div class="text-xs text-muted">{{ booking.visitor_phone }}</div>
+                      </td>
+                      <td>
+                        {% if booking.property %}
+                          <a href="{{ url_for('property_detail', id=booking.property.id) }}" target="_blank" class="table-title-link">
+                            {{ booking.property.title[:28] }}{% if booking.property.title|length > 28 %}...{% endif %}
+                          </a>
+                        {% else %} — {% endif %}
+                      </td>
+                      <td class="text-muted">{{ booking.booking_date.strftime('%d %b %Y') if booking.booking_date else '—' }}</td>
+                      <td><span class="time-slot">{{ booking.booking_time }}</span></td>
+                      <td>
+                        <span class="status-badge status-{{ booking.status.lower() }}">
+                          <span class="status-dot"></span> {{ booking.status }}
+                        </span>
+                      </td>
+                      <td class="text-right">
+                        <a href="{{ url_for('admin_bookings') }}" class="btn-sm primary">Manage</a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>No pending site visit bookings at the moment.</p>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Property</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody>
+
+        <!-- Right Side Panel -->
+        <div class="grid-column side-col">
+          <!-- Recent Enquiries -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-envelope-open-text"></i>
+                <h3>New Enquiries</h3>
+              </div>
+              <a href="{{ url_for('admin_enquiries') }}" class="btn-link">View All</a>
+            </div>
+
+            <div class="enquiry-list">
               {% if enquiries and enquiries|length > 0 %}
                 {% for enquiry in enquiries %}
-                <tr>
-                  <td>{{ enquiry.name }}</td>
-                  <td>{{ enquiry.email }}</td>
-                  <td>{{ enquiry.phone }}</td>
-                  <td>
-                    {% if enquiry.property %}
-                      <a href="{{ url_for('property_detail', id=enquiry.property.id) }}">{{ enquiry.property.title[:30] }}{% if enquiry.property.title|length>30 %}...{% endif %}</a>
-                    {% else %} General Enquiry {% endif %}
-                  </td>
-                  <td><span class="status-badge status-{{ enquiry.status.lower() }}">{{ enquiry.status }}</span></td>
-                  <td>{{ enquiry.created_at.strftime('%d %b %Y') }}</td>
-                </tr>
+                <div class="enquiry-item">
+                  <div class="enquiry-header">
+                    <div class="enquiry-user">
+                      <i class="fas fa-user-circle"></i>
+                      <div>
+                        <span class="enquiry-name">{{ enquiry.name }}</span>
+                        <span class="enquiry-email">{{ enquiry.email }}</span>
+                      </div>
+                    </div>
+                    <span class="status-badge status-{{ enquiry.status.lower() }}">{{ enquiry.status }}</span>
+                  </div>
+                  <div class="enquiry-body">
+                    <p>"{{ enquiry.message[:90] }}{% if enquiry.message|length > 90 %}...{% endif %}"</p>
+                  </div>
+                  <div class="enquiry-footer">
+                    <span class="enquiry-prop">
+                      {% if enquiry.property %}
+                        <i class="fas fa-building"></i> {{ enquiry.property.title[:24] }}...
+                      {% else %}
+                        <i class="fas fa-info-circle"></i> General Inquiry
+                      {% endif %}
+                    </span>
+                    <span class="enquiry-date">{{ enquiry.created_at.strftime('%d %b') }}</span>
+                  </div>
+                </div>
                 {% endfor %}
               {% else %}
-                <tr><td colspan="6" style="text-align:center;color:#777;">No recent enquiries.</td></tr>
+                <div class="empty-state py-4">
+                  <i class="fas fa-inbox"></i>
+                  <p>No new enquiries.</p>
+                </div>
               {% endif %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      <div class="dashboard-section">
-        <div class="section-header">
-          <h2>Recent Bookings</h2>
-          <a href="{{ url_for('admin_bookings') }}" class="btn btn-secondary">View All</a>
-        </div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead><tr><th>Visitor</th><th>Property</th><th>Date</th><th>Time</th><th>People</th><th>Status</th><th>Booked On</th></tr></thead>
-            <tbody>
-              {% if bookings and bookings|length > 0 %}
-                {% for booking in bookings %}
-                <tr>
-                  <td>{{ booking.visitor_name }}</td>
-                  <td>
-                    {% if booking.property %}
-                      <a href="{{ url_for('property_detail', id=booking.property.id) }}" target="_blank">{{ booking.property.title[:30] }}{% if booking.property.title|length>30 %}...{% endif %}</a>
-                    {% else %} — {% endif %}
-                  </td>
-                  <td>{{ booking.booking_date.strftime('%d %b %Y') if booking.booking_date else '—' }}</td>
-                  <td>{{ booking.booking_time }}</td>
-                  <td>{{ booking.number_of_visitors }}</td>
-                  <td><span class="status-badge status-{{ booking.status.lower() }}">{{ booking.status }}</span></td>
-                  <td>{{ booking.created_at.strftime('%d %b %Y') }}</td>
-                </tr>
+          <!-- Activity Audit Log Widget -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-history"></i>
+                <h3>System Activity Log</h3>
+              </div>
+              <span class="live-pulse"><span class="pulse-dot"></span> Live Feed</span>
+            </div>
+
+            <div class="activity-feed">
+              {% if activities and activities|length > 0 %}
+                {% for act in activities %}
+                <div class="activity-item">
+                  <div class="activity-icon-badge act-{{ act.user_type or 'guest' }}">
+                    {% if act.user_type == 'admin' %}
+                      <i class="fas fa-user-shield"></i>
+                    {% elif act.user_type == 'user' %}
+                      <i class="fas fa-user"></i>
+                    {% else %}
+                      <i class="fas fa-globe"></i>
+                    {% endif %}
+                  </div>
+                  <div class="activity-content">
+                    <div class="activity-desc">{{ act.description or act.action }}</div>
+                    <div class="activity-meta">
+                      <span class="act-type">{{ act.user_type|title }}</span>
+                      <span class="act-dot">•</span>
+                      <span class="act-time">{{ act.created_at.strftime('%d %b, %H:%M') }}</span>
+                    </div>
+                  </div>
+                </div>
                 {% endfor %}
               {% else %}
-                <tr><td colspan="7" style="text-align:center;color:#777;">No recent bookings.</td></tr>
+                <div class="empty-state py-4">
+                  <i class="fas fa-stream"></i>
+                  <p>No activity logged yet.</p>
+                </div>
               {% endif %}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
   </main>
 </div>
+
 {% endblock %}
