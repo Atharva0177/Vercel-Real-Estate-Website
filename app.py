@@ -19,6 +19,7 @@ from slugify import slugify
 
 
 app = Flask(__name__)
+handler = app
 app.config.from_object(Config)
 
 # Initialize database and mail

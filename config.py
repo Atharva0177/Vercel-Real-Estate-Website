@@ -4,14 +4,40 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import shutil
+
 class Config:
     # Security
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key_change_in_production')
     
-    # Database - Handle both SQLite (local) and PostgreSQL (production)
-    database_url = os.getenv('DATABASE_URL', 'sqlite:///realestate.db')
+    # Detect Vercel / Serverless Environment
+    IS_VERCEL = os.getenv('VERCEL') == '1' or os.getenv('VERCEL_ENV') is not None or os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
     
-    # Fix for Render's postgres:// URL (SQLAlchemy requires postgresql://)
+    # Database - Handle both SQLite (local & Vercel /tmp) and PostgreSQL (production)
+    database_url = os.getenv('DATABASE_URL')
+    
+    if not database_url:
+        if IS_VERCEL:
+            # On Vercel, filesystem is read-only except /tmp
+            db_path = '/tmp/realestate.db'
+            base_dir = os.path.abspath(os.path.dirname(__file__))
+            bundled_dbs = [
+                os.path.join(base_dir, 'instance', 'realestate.db'),
+                os.path.join(base_dir, 'realestate.db')
+            ]
+            for bundled in bundled_dbs:
+                if os.path.exists(bundled) and not os.path.exists(db_path):
+                    try:
+                        shutil.copy2(bundled, db_path)
+                        print(f"Copied bundled DB from {bundled} to {db_path}")
+                        break
+                    except Exception as e:
+                        print(f"Failed to copy DB to /tmp: {e}")
+            database_url = f'sqlite:///{db_path}'
+        else:
+            database_url = 'sqlite:///realestate.db'
+    
+    # Fix for Render/Heroku postgres:// URL (SQLAlchemy requires postgresql://)
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     
