@@ -15,7 +15,16 @@ try:
 except ImportError:
     vercel_blob = None  # Will use local storage if not available
 
-from slugify import slugify
+try:
+    from slugify import slugify
+except ImportError:
+    import re
+    def slugify(text):
+        if not text:
+            return ""
+        text = str(text).lower().strip()
+        text = re.sub(r'[^\w\s-]', '', text)
+        return re.sub(r'[\s_-]+', '-', text)
 
 
 app = Flask(__name__)
